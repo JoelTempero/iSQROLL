@@ -175,16 +175,38 @@ const Components = {
 
         <!-- Signup Modal -->
         <div class="modal-overlay" id="signupModal">
-            <div class="modal">
+            <div class="modal" style="max-width:480px;">
                 <div class="modal-header">
                     <h3 class="modal-title">Create Account</h3>
                     <button class="modal-close" onclick="closeModal('signup')">✕</button>
                 </div>
                 <div class="modal-body">
                     <form onsubmit="handleSignup(event)">
+                        <!-- Account Type Selection -->
                         <div class="form-group">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-input" id="signupName" placeholder="Your name" required>
+                            <label class="form-label">Account Type</label>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                                <label class="account-type-option" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid var(--primary);border-radius:6px;cursor:pointer;transition:all 0.2s;">
+                                    <input type="radio" name="accountType" value="buyer" checked style="accent-color:var(--primary);" onchange="toggleSubscriptionTier()">
+                                    <div>
+                                        <div style="font-weight:600;font-size:14px;">Buyer</div>
+                                        <div style="font-size:12px;color:#6B7280;">Browse & purchase</div>
+                                    </div>
+                                </label>
+                                <label class="account-type-option" style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #e5e7eb;border-radius:6px;cursor:pointer;transition:all 0.2s;">
+                                    <input type="radio" name="accountType" value="seller" style="accent-color:var(--primary);" onchange="toggleSubscriptionTier()">
+                                    <div>
+                                        <div style="font-weight:600;font-size:14px;">Seller</div>
+                                        <div style="font-size:12px;color:#6B7280;">List & sell items</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <p style="font-size:11px;color:#6B7280;margin-top:6px;">You can add the other account type later from your profile.</p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-input" id="signupName" placeholder="Your full name" required>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
@@ -200,7 +222,27 @@ const Components = {
                                 ${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%;">Create Account</button>
+
+                        <!-- Subscription Tier (for sellers) -->
+                        <div class="form-group" id="subscriptionTierGroup" style="display:none;">
+                            <label class="form-label">Subscription Plan</label>
+                            <select class="form-input form-select" id="signupTier">
+                                <option value="free">Free Membership - NZ$0/month</option>
+                                <option value="realestate">Real Estate Gold - NZ$399/month</option>
+                                <option value="business">Business - NZ$399/month</option>
+                                <option value="dealership">Dealership Premium - NZ$499/month</option>
+                            </select>
+                            <p style="font-size:11px;color:#6B7280;margin-top:6px;">Free plan includes unlimited listings. <a onclick="closeModal('signup');App.navigate('pricing');" style="color:var(--primary);cursor:pointer;">Compare plans</a></p>
+                        </div>
+
+                        <div class="form-group" style="margin-top:16px;">
+                            <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#6B7280;cursor:pointer;">
+                                <input type="checkbox" id="signupTerms" required style="margin-top:2px;accent-color:var(--primary);">
+                                <span>I agree to the <a onclick="closeModal('signup');App.navigate('terms');" style="color:var(--primary);cursor:pointer;">Terms and Conditions</a> and <a onclick="closeModal('signup');App.navigate('privacy');" style="color:var(--primary);cursor:pointer;">Privacy Policy</a></span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:16px;">Create Account</button>
                     </form>
                     <p class="modal-footer-text">Already have an account? <a onclick="closeModal('signup');openModal('login');">Log in</a></p>
                 </div>
@@ -403,17 +445,40 @@ const App = {
         }
     },
 
-    async signup(email, password, name) {
+    async signup(email, password, name, accountType, subscriptionTier) {
         try {
             const cred = await auth.createUserWithEmailAndPassword(email, password);
             await cred.user.updateProfile({ displayName: name });
             const location = document.getElementById('signupLocation')?.value || 'Auckland';
-            await db.collection('users').doc(cred.user.uid).set({
-                email, displayName: name, location,
+
+            // Build user profile based on account type
+            const userProfile = {
+                email,
+                displayName: name,
+                location,
+                accountType: accountType || 'buyer',
+                subscriptionTier: accountType === 'seller' ? (subscriptionTier || 'free') : null,
+                verified: false,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+
+            // Add seller-specific fields
+            if (accountType === 'seller') {
+                userProfile.listingCount = 0;
+                userProfile.salesCount = 0;
+                userProfile.rating = 0;
+                userProfile.reviewCount = 0;
+            }
+
+            await db.collection('users').doc(cred.user.uid).set(userProfile);
             closeModal('signup');
-            showToast('Welcome to iSQROLL!');
+
+            // Show appropriate welcome message
+            if (accountType === 'seller') {
+                showToast('Welcome to iSQROLL! Complete verification to start selling.');
+            } else {
+                showToast('Welcome to iSQROLL!');
+            }
         } catch (e) {
             showToast(e.message, 'error');
         }
@@ -479,14 +544,99 @@ const App = {
     // RENDER HELPERS
     // ============================================
 
+    // Helper to render price/auction section for listing details
+    renderPriceSection(l) {
+        if (l.saleType === 'auction') {
+            // Calculate time remaining
+            let timeLeftText = '';
+            let isEnded = false;
+            if (l.expiresAt) {
+                const expiryDate = l.expiresAt.toDate ? l.expiresAt.toDate() : new Date(l.expiresAt);
+                const now = new Date();
+                const diff = expiryDate - now;
+                if (diff > 0) {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    timeLeftText = days > 0 ? `${days}d ${hours}h remaining` : `${hours}h ${mins}m remaining`;
+                } else {
+                    timeLeftText = 'Auction ended';
+                    isEnded = true;
+                }
+            }
+
+            const currentPrice = l.currentBid || l.startingBid || l.price || 0;
+            const minBid = currentPrice + Math.max(1, Math.floor(currentPrice * 0.05)); // 5% increment or $1 min
+
+            return `
+                <div style="background:#7c3aed;color:white;padding:12px;border-radius:6px;margin-bottom:16px;text-align:center;">
+                    <span style="font-size:12px;font-weight:600;text-transform:uppercase;">AUCTION</span>
+                </div>
+                <div class="listing-info-price" style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:13px;color:var(--slate-500);margin-bottom:4px;">${l.currentBid ? 'Current Bid' : 'Starting Bid'}</div>
+                    <span class="current" style="font-size:32px;">$${currentPrice.toLocaleString()}</span>
+                    ${l.bidCount > 0 ? `<div style="font-size:13px;color:var(--slate-500);margin-top:4px;">${l.bidCount} bid${l.bidCount !== 1 ? 's' : ''}</div>` : '<div style="font-size:13px;color:var(--slate-500);margin-top:4px;">No bids yet</div>'}
+                </div>
+                <div style="background:var(--slate-100);padding:12px;border-radius:6px;text-align:center;margin-bottom:16px;">
+                    <span style="font-weight:600;color:${isEnded ? '#ef4444' : '#7c3aed'};">${timeLeftText}</span>
+                </div>
+                ${!isEnded ? `
+                <div class="listing-buying-options">
+                    <div style="display:flex;gap:8px;margin-bottom:12px;">
+                        <input type="number" id="bidAmount" class="form-input" placeholder="Enter bid" min="${minBid}" value="${minBid}" style="flex:1;">
+                        <button class="btn btn-primary" onclick="${this.currentUser ? `placeBid('${l.id}', document.getElementById('bidAmount').value)` : "openModal('login')"}">Place Bid</button>
+                    </div>
+                    <p style="font-size:11px;color:var(--slate-500);text-align:center;">Min bid: $${minBid.toLocaleString()}</p>
+                </div>
+                ` : `
+                <div style="text-align:center;padding:16px;background:var(--slate-50);border-radius:6px;">
+                    <p style="color:var(--slate-600);">This auction has ended.</p>
+                    ${l.currentBid ? `<p style="color:var(--primary);font-weight:600;">Winning bid: $${l.currentBid.toLocaleString()}</p>` : ''}
+                </div>
+                `}
+                <button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Ask Seller a Question</button>
+            `;
+        } else {
+            // Buy Now listing
+            return `
+                <div class="listing-info-price">
+                    <span class="current">${l.priceDisplay || '$' + (l.price || 0).toLocaleString()}</span>
+                </div>
+                <div class="listing-buying-options">
+                    <button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Contact Seller</button>
+                    ${l.price ? `<button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? `showToast('Purchase request sent!')` : "openModal('login')"}">Buy for NZ$ ${l.price.toLocaleString()}</button>` : ''}
+                </div>
+            `;
+        }
+    },
+
     renderCard(l) {
         const saved = this.savedItems.includes(l.id);
-        const priceDisplay = l.priceDisplay || (l.price ? `$${l.price.toLocaleString()}` : 'Price on Application');
+        // Calculate auction time remaining
+        let auctionTimeLeft = '';
+        if (l.saleType === 'auction' && l.expiresAt) {
+            const expiryDate = l.expiresAt.toDate ? l.expiresAt.toDate() : new Date(l.expiresAt);
+            const now = new Date();
+            const diff = expiryDate - now;
+            if (diff > 0) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                auctionTimeLeft = days > 0 ? `${days}d ${hours}h left` : `${hours}h left`;
+            } else {
+                auctionTimeLeft = 'Ended';
+            }
+        }
+
+        const priceDisplay = l.saleType === 'auction'
+            ? (l.currentBid ? `$${l.currentBid.toLocaleString()}` : (l.price ? `$${l.price.toLocaleString()}` : 'No bids'))
+            : (l.priceDisplay || (l.price ? `$${l.price.toLocaleString()}` : 'Price on Application'));
+
         return `
         <div class="listing-card" onclick="App.navigate('listing','${l.id}')">
             <div class="listing-image">
                 <img src="${l.images?.[0] || 'https://picsum.photos/400/300?grayscale'}" alt="${l.title}" loading="lazy">
                 ${l.featured ? '<span class="listing-badge">Featured</span>' : ''}
+                ${l.saleType === 'auction' ? '<span class="listing-badge" style="background:#7c3aed;">Auction</span>' : ''}
                 ${l.listingType === 'vehicle' ? '<span class="listing-badge" style="background:var(--slate-800);">Vehicle</span>' : ''}
                 ${l.listingType === 'property' ? '<span class="listing-badge" style="background:var(--primary);">Property</span>' : ''}
                 <button class="listing-save ${saved ? 'saved' : ''}" onclick="event.stopPropagation();App.toggleSave('${l.id}')">
@@ -495,10 +645,14 @@ const App = {
             </div>
             <div class="listing-content">
                 <h3 class="listing-title">${l.title}</h3>
-                <div class="listing-price">${priceDisplay}${l.wasPrice ? `<span class="was">$${l.wasPrice.toLocaleString()}</span>` : ''}</div>
+                <div class="listing-price">
+                    ${l.saleType === 'auction' ? '<span style="font-size:11px;color:#7c3aed;font-weight:500;">Current bid: </span>' : ''}
+                    ${priceDisplay}
+                    ${l.wasPrice ? `<span class="was">$${l.wasPrice.toLocaleString()}</span>` : ''}
+                </div>
                 <div class="listing-meta">
                     <span class="listing-location">📍 ${l.location || 'NZ'}</span>
-                    <span>👁 ${l.views || 0}</span>
+                    ${l.saleType === 'auction' ? `<span style="color:#7c3aed;font-weight:500;">${auctionTimeLeft}</span>` : `<span>👁 ${l.views || 0}</span>`}
                 </div>
             </div>
         </div>`;
@@ -775,15 +929,9 @@ const App = {
                         
                         <div class="listing-info-header">
                             <h1 class="listing-info-title">${l.title}</h1>
-                            <div class="listing-info-price">
-                                <span class="current">${l.priceDisplay || '$' + (l.price || 0).toLocaleString()}</span>
-                            </div>
                         </div>
-                        
-                        <div class="listing-buying-options">
-                            <button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Contact Seller</button>
-                            ${l.price ? `<button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? `showToast('Purchase request sent!')` : "openModal('login')"}">Buy for NZ$ ${l.price.toLocaleString()}</button>` : ''}
-                        </div>
+
+                        ${this.renderPriceSection(l)}
                         
                         <div class="listing-shipping-section">
                             <h4>Shipping</h4>
@@ -896,15 +1044,10 @@ const App = {
                         
                         <div class="listing-info-header">
                             <h1 class="listing-info-title">${l.title}</h1>
-                            <div class="listing-info-price">
-                                <span class="current">${l.priceDisplay || (l.price ? '$' + l.price.toLocaleString() : 'Price by Negotiation')}</span>
-                            </div>
                         </div>
-                        
-                        <div class="listing-buying-options">
-                            <button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Enquire</button>
-                        </div>
-                        
+
+                        ${this.renderPriceSection(l)}
+
                         <!-- Agent Card -->
                         <div class="seller-card" style="margin-top:24px;">
                             ${l.agentLogo ? `<img src="${l.agentLogo}" alt="${l.agentCompany}" style="max-height:50px;margin-bottom:16px;">` : ''}
@@ -1002,11 +1145,9 @@ const App = {
                         <div class="listing-info-header">
                             <h1 class="listing-info-title">${l.title}</h1>
                         </div>
-                        
-                        <div class="listing-buying-options">
-                            ${l.price ? `<button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? "showToast('Purchase simulated!')" : "openModal('login')"}">Buy for NZ$ ${l.price.toLocaleString()}</button>` : ''}
-                        </div>
-                        
+
+                        ${this.renderPriceSection(l)}
+
                         <div class="listing-shipping-section">
                             <h4>Shipping</h4>
                             <p>${l.shipping || 'Pickup'}</p>
@@ -1155,58 +1296,93 @@ const App = {
 
     renderPricing() {
         return `
-        <div class="page-header"><div class="container"><h1>Pricing</h1><p class="lead">Simple, affordable memberships</p></div></div>
+        <div class="page-header"><div class="container"><h1>Monthly Subscription</h1><p class="lead">Choose the plan that's right for you</p></div></div>
         <section class="section"><div class="container">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;max-width:900px;margin:0 auto;">
-                <!-- Free Plan -->
-                <div class="card" style="text-align:center;">
-                    <div class="card-body" style="padding:40px;">
-                        <h3 style="margin-bottom:8px;">Free</h3>
-                        <div style="font-size:48px;font-weight:700;color:var(--primary);margin-bottom:24px;">$0</div>
-                        <ul style="text-align:left;list-style:none;margin-bottom:32px;">
-                            <li style="padding:8px 0;">✓ Browse all listings</li>
-                            <li style="padding:8px 0;">✓ Save to watchlist</li>
-                            <li style="padding:8px 0;">✓ Contact sellers</li>
-                            <li style="padding:8px 0;">✓ 5 free listings/month</li>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1100px;margin:0 auto;">
+
+                <!-- Free Membership -->
+                <div class="card" style="text-align:center;position:relative;">
+                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
+                        <span style="font-size:24px;">⭐</span>
+                    </div>
+                    <div class="card-body" style="padding:32px 20px;">
+                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">FREE MEMBERSHIP</h3>
+                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited General listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Automotive listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Property listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
                         </ul>
-                        <button class="btn btn-secondary" style="width:100%;" onclick="${this.currentUser ? "showToast('You are on the Free plan')" : "openModal('signup')"}">Get Started</button>
+                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 0.00</div>
+                        <button class="btn btn-secondary" style="width:100%;" onclick="${this.currentUser ? "showToast('You are on the Free plan')" : "openModal('signup')"}">Select</button>
                     </div>
                 </div>
-                
-                <!-- Seller Plan -->
-                <div class="card" style="text-align:center;border:2px solid var(--primary);">
-                    <div class="card-body" style="padding:40px;">
-                        <span style="background:var(--primary);color:white;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;">POPULAR</span>
-                        <h3 style="margin:16px 0 8px;">Seller</h3>
-                        <div style="font-size:48px;font-weight:700;color:var(--primary);margin-bottom:24px;">$9<span style="font-size:16px;color:var(--slate-500);">/mo</span></div>
-                        <ul style="text-align:left;list-style:none;margin-bottom:32px;">
-                            <li style="padding:8px 0;">✓ Everything in Free</li>
-                            <li style="padding:8px 0;">✓ Unlimited listings</li>
-                            <li style="padding:8px 0;">✓ Featured placement</li>
-                            <li style="padding:8px 0;">✓ Analytics dashboard</li>
+
+                <!-- Real Estate Gold -->
+                <div class="card" style="text-align:center;position:relative;border:2px solid #3b82f6;">
+                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
+                        <span style="font-size:24px;">⭐</span>
+                    </div>
+                    <div class="card-body" style="padding:32px 20px;">
+                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">REAL ESTATE GOLD</h3>
+                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Property listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
                         </ul>
-                        <button class="btn btn-primary" style="width:100%;" onclick="showToast('Subscriptions coming soon!')">Subscribe</button>
+                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 399</div>
+                        <button class="btn btn-primary" style="width:100%;background:#3b82f6;" onclick="showToast('Contact us to subscribe')">Select</button>
                     </div>
                 </div>
-                
-                <!-- Business Plan -->
-                <div class="card" style="text-align:center;">
-                    <div class="card-body" style="padding:40px;">
-                        <h3 style="margin-bottom:8px;">Business</h3>
-                        <div style="font-size:48px;font-weight:700;color:var(--primary);margin-bottom:24px;">$29<span style="font-size:16px;color:var(--slate-500);">/mo</span></div>
-                        <ul style="text-align:left;list-style:none;margin-bottom:32px;">
-                            <li style="padding:8px 0;">✓ Everything in Seller</li>
-                            <li style="padding:8px 0;">✓ Business profile page</li>
-                            <li style="padding:8px 0;">✓ Logo & branding</li>
-                            <li style="padding:8px 0;">✓ Priority support</li>
+
+                <!-- Business -->
+                <div class="card" style="text-align:center;position:relative;border:2px solid #ef4444;">
+                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
+                        <span style="font-size:24px;">⭐</span>
+                    </div>
+                    <div class="card-body" style="padding:32px 20px;">
+                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">BUSINESS</h3>
+                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 100 Automotive listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 100 Property listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Motorcentral Data Import</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
                         </ul>
-                        <button class="btn btn-secondary" style="width:100%;" onclick="showToast('Subscriptions coming soon!')">Contact Us</button>
+                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 399</div>
+                        <button class="btn btn-primary" style="width:100%;background:#ef4444;" onclick="showToast('Contact us to subscribe')">Select</button>
+                    </div>
+                </div>
+
+                <!-- Dealership Premium -->
+                <div class="card" style="text-align:center;position:relative;border:2px solid var(--primary);">
+                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
+                        <span style="font-size:24px;">⭐</span>
+                    </div>
+                    <div class="card-body" style="padding:32px 20px;">
+                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;color:var(--primary);">DEALERSHIP PREMIUM</h3>
+                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Automotive listings</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Motorcentral Data Import</li>
+                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
+                        </ul>
+                        <div style="font-size:32px;font-weight:700;color:var(--primary);margin:20px 0;">NZ$ 499</div>
+                        <button class="btn btn-primary" style="width:100%;" onclick="showToast('Contact us to subscribe')">Select</button>
                     </div>
                 </div>
             </div>
-            
+
             <div style="text-align:center;margin-top:48px;">
-                <p class="text-muted">No lock-in contracts. Cancel anytime. All prices in NZD.</p>
+                <p class="text-muted">All prices in NZD per month. Cancel anytime with 48 hours notice before billing cycle ends.</p>
+                <p class="text-muted" style="margin-top:8px;">By subscribing, you agree to our <a href="#terms" onclick="App.navigate('terms')" style="color:var(--primary);">Terms and Conditions</a>.</p>
             </div>
         </div></section>`;
     },
@@ -1380,7 +1556,7 @@ const App = {
                             <select class="form-input form-select" id="listingCat">
                                 ${this.categoryGroups.map(g => `
                                     <optgroup label="${g.name}">
-                                        ${this.categories.filter(c => c.group === g.id).map(c => 
+                                        ${this.categories.filter(c => c.group === g.id).map(c =>
                                             `<option value="${c.id}">${c.name}</option>`
                                         ).join('')}
                                     </optgroup>
@@ -1388,10 +1564,40 @@ const App = {
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Price ($)</label>
-                            <input type="number" class="form-input" id="listingPrice" placeholder="0">
+                            <label class="form-label">Sale Type</label>
+                            <select class="form-input form-select" id="listingSaleType" onchange="toggleAuctionFields()">
+                                <option value="buynow">Buy Now (Fixed Price)</option>
+                                <option value="auction">Auction</option>
+                            </select>
                         </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" id="priceLabel">Price ($)</label>
+                            <input type="number" class="form-input" id="listingPrice" placeholder="0">
+                        </div>
+                        <div class="form-group" id="auctionReserveGroup" style="display:none;">
+                            <label class="form-label">Reserve Price ($) <span style="color:#6B7280;font-weight:normal;">(optional)</span></label>
+                            <input type="number" class="form-input" id="listingReserve" placeholder="Minimum acceptable price">
+                        </div>
+                    </div>
+
+                    <div id="auctionDurationGroup" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Auction Duration</label>
+                            <select class="form-input form-select" id="listingAuctionDuration">
+                                <option value="3">3 days</option>
+                                <option value="7" selected>7 days</option>
+                                <option value="10">10 days</option>
+                                <option value="14">14 days</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <p style="font-size:12px;color:#6B7280;margin:-8px 0 16px;padding:10px;background:#f9fafb;border-radius:6px;">
+                        Listings are active for up to <strong>90 days</strong>. Auctions end after the selected duration.
+                    </p>
                     
                     <!-- Vehicle-specific fields -->
                     <div id="vehicleFields" style="display:none;">
@@ -1466,8 +1672,25 @@ function toggleDropdown() {
     document.getElementById('userDropdown')?.classList.toggle('active'); 
 }
 
-function toggleMobileMenu() { 
-    document.getElementById('mobileNav')?.classList.toggle('active'); 
+function toggleMobileMenu() {
+    document.getElementById('mobileNav')?.classList.toggle('active');
+}
+
+function toggleSubscriptionTier() {
+    const accountType = document.querySelector('input[name="accountType"]:checked')?.value;
+    const tierGroup = document.getElementById('subscriptionTierGroup');
+    const options = document.querySelectorAll('.account-type-option');
+
+    // Update styling on radio options
+    options.forEach(opt => {
+        const radio = opt.querySelector('input[type="radio"]');
+        opt.style.borderColor = radio.checked ? 'var(--primary)' : '#e5e7eb';
+    });
+
+    // Show/hide subscription tier dropdown
+    if (tierGroup) {
+        tierGroup.style.display = accountType === 'seller' ? 'block' : 'none';
+    }
 }
 
 function showToast(msg, type = 'success') { 
@@ -1495,13 +1718,18 @@ function handleLogin(e) {
     ); 
 }
 
-function handleSignup(e) { 
-    e.preventDefault(); 
+function handleSignup(e) {
+    e.preventDefault();
+    const accountType = document.querySelector('input[name="accountType"]:checked')?.value || 'buyer';
+    const subscriptionTier = document.getElementById('signupTier')?.value || 'free';
+
     App.signup(
-        document.getElementById('signupEmail').value, 
-        document.getElementById('signupPassword').value, 
-        document.getElementById('signupName').value
-    ); 
+        document.getElementById('signupEmail').value,
+        document.getElementById('signupPassword').value,
+        document.getElementById('signupName').value,
+        accountType,
+        subscriptionTier
+    );
 }
 
 function toggleListingFields() {
@@ -1510,11 +1738,113 @@ function toggleListingFields() {
     document.getElementById('propertyFields').style.display = type === 'property' ? 'block' : 'none';
 }
 
+function toggleAuctionFields() {
+    const saleType = document.getElementById('listingSaleType').value;
+    const isAuction = saleType === 'auction';
+
+    // Update price label
+    const priceLabel = document.getElementById('priceLabel');
+    if (priceLabel) {
+        priceLabel.textContent = isAuction ? 'Starting Bid ($)' : 'Price ($)';
+    }
+
+    // Show/hide auction-specific fields
+    const reserveGroup = document.getElementById('auctionReserveGroup');
+    const durationGroup = document.getElementById('auctionDurationGroup');
+
+    if (reserveGroup) reserveGroup.style.display = isAuction ? 'block' : 'none';
+    if (durationGroup) durationGroup.style.display = isAuction ? 'block' : 'none';
+}
+
+async function placeBid(listingId, bidAmount) {
+    if (!App.currentUser) {
+        openModal('login');
+        return;
+    }
+
+    bidAmount = parseInt(bidAmount);
+    if (isNaN(bidAmount) || bidAmount <= 0) {
+        showToast('Please enter a valid bid amount', 'error');
+        return;
+    }
+
+    try {
+        const listingRef = db.collection('listings').doc(listingId);
+        const doc = await listingRef.get();
+
+        if (!doc.exists) {
+            showToast('Listing not found', 'error');
+            return;
+        }
+
+        const listing = doc.data();
+
+        // Check if auction has ended
+        if (listing.expiresAt) {
+            const expiryDate = listing.expiresAt.toDate();
+            if (new Date() > expiryDate) {
+                showToast('This auction has ended', 'error');
+                return;
+            }
+        }
+
+        // Check if bid is high enough
+        const currentPrice = listing.currentBid || listing.startingBid || listing.price || 0;
+        const minBid = currentPrice + Math.max(1, Math.floor(currentPrice * 0.05));
+
+        if (bidAmount < minBid) {
+            showToast(`Bid must be at least $${minBid.toLocaleString()}`, 'error');
+            return;
+        }
+
+        // Check reserve price
+        if (listing.reservePrice && bidAmount < listing.reservePrice) {
+            showToast(`Bid placed! Reserve not yet met.`);
+        } else {
+            showToast(`Bid of $${bidAmount.toLocaleString()} placed successfully!`);
+        }
+
+        // Update listing with new bid
+        await listingRef.update({
+            currentBid: bidAmount,
+            bidCount: firebase.firestore.FieldValue.increment(1),
+            bidHistory: firebase.firestore.FieldValue.arrayUnion({
+                userId: App.currentUser.uid,
+                userName: App.currentUser.displayName || 'Anonymous',
+                amount: bidAmount,
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        // Reload listings and re-render
+        await App.loadListings();
+        App.render();
+
+    } catch (e) {
+        console.error('Bid error:', e);
+        showToast('Failed to place bid: ' + e.message, 'error');
+    }
+}
+
 async function createListing(e) {
     e.preventDefault();
     if (!App.currentUser) return;
-    
+
     const type = document.getElementById('listingType').value;
+    const saleType = document.getElementById('listingSaleType')?.value || 'buynow';
+
+    // Calculate expiry date (90 days for Buy Now, auction duration for auctions)
+    const now = new Date();
+    let expiresAt;
+
+    if (saleType === 'auction') {
+        const auctionDays = parseInt(document.getElementById('listingAuctionDuration')?.value) || 7;
+        expiresAt = new Date(now.getTime() + (auctionDays * 24 * 60 * 60 * 1000));
+    } else {
+        // 90 day max listing duration
+        expiresAt = new Date(now.getTime() + (90 * 24 * 60 * 60 * 1000));
+    }
+
     const listing = {
         title: document.getElementById('listingTitle').value,
         price: parseInt(document.getElementById('listingPrice').value) || null,
@@ -1523,14 +1853,26 @@ async function createListing(e) {
         location: document.getElementById('listingLoc').value,
         images: [document.getElementById('listingImage').value || 'https://picsum.photos/800/600?grayscale'],
         listingType: type,
+        saleType: saleType,
         sellerId: App.currentUser.uid,
         sellerName: App.currentUser.displayName || 'User',
         sellerVerified: true,
         status: 'active',
         views: 0,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        expiresAt: firebase.firestore.Timestamp.fromDate(expiresAt)
     };
-    
+
+    // Add auction-specific fields
+    if (saleType === 'auction') {
+        listing.reservePrice = parseInt(document.getElementById('listingReserve')?.value) || null;
+        listing.startingBid = listing.price;
+        listing.currentBid = null;
+        listing.bidCount = 0;
+        listing.bidHistory = [];
+        listing.auctionEnded = false;
+    }
+
     // Add type-specific fields
     if (type === 'vehicle') {
         listing.make = document.getElementById('vehicleMake')?.value;
@@ -1540,21 +1882,21 @@ async function createListing(e) {
         listing.colour = document.getElementById('vehicleColour')?.value;
         listing.transmission = document.getElementById('vehicleTrans')?.value;
     }
-    
+
     if (type === 'property') {
         listing.bedrooms = parseInt(document.getElementById('propBeds')?.value);
         listing.bathrooms = parseInt(document.getElementById('propBaths')?.value);
         listing.landArea = parseInt(document.getElementById('propLand')?.value);
         listing.floorArea = parseInt(document.getElementById('propFloor')?.value);
     }
-    
+
     try {
         await db.collection('listings').add(listing);
-        showToast('Listing created!');
+        showToast(saleType === 'auction' ? 'Auction created!' : 'Listing created!');
         await App.loadListings();
         App.navigate('my-listings');
-    } catch (e) { 
-        showToast(e.message, 'error'); 
+    } catch (e) {
+        showToast(e.message, 'error');
     }
 }
 
