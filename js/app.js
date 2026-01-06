@@ -111,6 +111,7 @@ const Components = {
                 </div>
                 <div class="bottom-nav-item center" onclick="${App.currentUser ? "App.navigate('create')" : "openModal('login')"}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>iSell</span>
                 </div>
                 <div class="bottom-nav-item ${page === 'watchlist' ? 'active' : ''}" onclick="${App.currentUser ? "App.navigate('watchlist')" : "openModal('login')"}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
