@@ -19,10 +19,4 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Demo credentials
-const DEMO_CREDENTIALS = {
-    email: 'demo@isqroll.co.nz',
-    password: 'demo123'
-};
-
 console.log('🔥 Firebase initialized');
