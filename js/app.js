@@ -271,16 +271,28 @@ const App = {
 
     async loadCategories() {
         try {
-            const snap = await db.collection('categories').orderBy('order').get();
+            const snap = await db.collection('categories').get();
             this.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            if (this.categories.length === 0) this.categories = CATEGORIES;
+            // Sort client-side by order
+            this.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
             
             // Load category groups
             const groupSnap = await db.collection('categoryGroups').get();
             this.categoryGroups = groupSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            if (this.categoryGroups.length === 0) this.categoryGroups = CATEGORY_GROUPS;
+            
+            // Fallback to local data if empty
+            if (this.categories.length === 0) {
+                console.log('No categories in Firestore, using local');
+                this.categories = CATEGORIES;
+            }
+            if (this.categoryGroups.length === 0) {
+                console.log('No category groups in Firestore, using local');
+                this.categoryGroups = CATEGORY_GROUPS;
+            }
+            
+            console.log(`📁 Loaded ${this.categories.length} categories, ${this.categoryGroups.length} groups`);
         } catch (e) {
-            console.log('Using local categories');
+            console.log('Using local categories:', e.message);
             this.categories = CATEGORIES;
             this.categoryGroups = CATEGORY_GROUPS;
         }
@@ -624,16 +636,23 @@ const App = {
     },
 
     renderCategories() {
+        // Debug: log what we have
+        console.log('Categories:', this.categories.length, 'Groups:', this.categoryGroups.length);
+        
+        // If categories haven't loaded yet, use local data
+        const cats = this.categories.length > 0 ? this.categories : CATEGORIES;
+        const groups = this.categoryGroups.length > 0 ? this.categoryGroups : CATEGORY_GROUPS;
+        
         return `
-        <div class="page-header"><div class="container"><h1>All Categories</h1><p class="lead">Browse ${this.categories.length} categories across ${this.categoryGroups.length} groups</p></div></div>
+        <div class="page-header"><div class="container"><h1>All Categories</h1><p class="lead">Browse ${cats.length} categories across ${groups.length} groups</p></div></div>
         <section class="section"><div class="container">
-            ${this.categoryGroups.map(g => {
-                const cats = this.categories.filter(c => c.group === g.id);
+            ${groups.map(g => {
+                const groupCats = cats.filter(c => c.group === g.id);
                 return `
                 <div style="margin-bottom:48px;">
                     <h2 style="margin-bottom:24px;">${g.icon} ${g.name}</h2>
                     <div class="categories-grid">
-                        ${cats.map(c => {
+                        ${groupCats.map(c => {
                             const count = this.listings.filter(l => l.category === c.id).length;
                             return `<div class="category-card" onclick="App.searchCategory='${c.id}';App.searchGroup='';App.navigate('browse');">
                                 <div class="category-icon">${c.icon}</div>
