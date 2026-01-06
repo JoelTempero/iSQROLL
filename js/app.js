@@ -145,9 +145,12 @@ const Components = {
             <div class="container">
                 <div class="footer-grid">
                     <div class="footer-brand">
-                        <div class="logo" onclick="App.navigate('home')">
-                            <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
-                            i<span class="accent">SQROLL</span>
+                        <div class="logo" onclick="App.navigate('home')" style="margin-bottom:12px;">
+                            <img src="images/Isqroll-default-logo.png" alt="iSQROLL" class="logo-img" style="height:36px;width:auto;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="logo-fallback" style="display:none;">
+                                <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+                                i<span class="accent">SQROLL</span>
+                            </div>
                         </div>
                         <p>A marketplace for the people. Buy and sell with Kiwis you can trust.</p>
                     </div>
@@ -1101,10 +1104,10 @@ const App = {
         <div class="mobile-search-header">
             <div class="container">
                 <div class="mobile-search-bar">
-                    <div class="mobile-search-input-wrapper">
+                    <button class="mobile-search-btn" onclick="toggleMobileFilters()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Search listings..." value="${this.searchQuery}" onkeyup="if(event.key==='Enter'){App.searchQuery=this.value;App.render();}">
-                    </div>
+                        <span>${this.searchQuery || 'Search'}</span>
+                    </button>
                     <button class="btn btn-primary mobile-filter-btn" onclick="toggleMobileFilters()">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
                         Filters
@@ -1117,14 +1120,23 @@ const App = {
         <!-- Mobile Filter Drawer -->
         <div class="mobile-filter-drawer" id="mobileFilterDrawer">
             <div class="mobile-filter-drawer-header">
-                <h3>Filters</h3>
+                <h3>Search & Filters</h3>
                 <button class="btn btn-ghost" onclick="toggleMobileFilters()">✕</button>
             </div>
             <div class="mobile-filter-drawer-body">
+                <!-- Keywords Search -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Keywords</label>
+                    <div class="mobile-search-input-wrapper">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Enter keywords..." value="${this.searchQuery}">
+                    </div>
+                </div>
+
                 <!-- Category Selection -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Category</label>
-                    <select class="form-input form-select" onchange="App.searchCategory=this.value;App.searchGroup='';App.render();">
+                    <select class="form-input form-select" id="mobileCategorySelect">
                         <option value="">All Categories</option>
                         ${this.categoryGroups.map(g => `
                             <optgroup label="${g.name}">
@@ -1139,7 +1151,7 @@ const App = {
                 <!-- Location -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Location</label>
-                    <select class="form-input form-select" onchange="App.filters.location=this.value;App.render();">
+                    <select class="form-input form-select" id="mobileLocationSelect">
                         <option value="">All New Zealand</option>
                         ${NZ_REGIONS.map(r => `<option value="${r}" ${f.location === r ? 'selected' : ''}>${r}</option>`).join('')}
                     </select>
@@ -1148,7 +1160,7 @@ const App = {
                 <!-- Sort -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Sort by</label>
-                    <select class="form-input form-select" onchange="App.filters.sortBy=this.value;App.render();">
+                    <select class="form-input form-select" id="mobileSortSelect">
                         <option value="newest" ${f.sortBy === 'newest' ? 'selected' : ''}>Newest first</option>
                         <option value="oldest" ${f.sortBy === 'oldest' ? 'selected' : ''}>Oldest first</option>
                         <option value="price-low" ${f.sortBy === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
@@ -1156,13 +1168,18 @@ const App = {
                     </select>
                 </div>
 
-                <!-- Price Range -->
+                <!-- Price Range Slider -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Price Range</label>
-                    <div class="mobile-price-inputs">
-                        <input type="number" class="form-input" placeholder="Min $" id="mobilePriceMin" value="${f.priceMin}">
-                        <span>to</span>
-                        <input type="number" class="form-input" placeholder="Max $" id="mobilePriceMax" value="${f.priceMax}">
+                    <div class="price-slider-container">
+                        <div class="price-slider-values">
+                            <span>$<span id="mobilePriceMinDisplay">${f.priceMin || '0'}</span></span>
+                            <span>$<span id="mobilePriceMaxDisplay">${f.priceMax || '50,000+'}</span></span>
+                        </div>
+                        <div class="price-slider-track">
+                            <input type="range" id="mobilePriceMinSlider" class="price-slider price-slider-min" min="0" max="50000" step="100" value="${f.priceMin || 0}" oninput="updatePriceSlider('mobile')">
+                            <input type="range" id="mobilePriceMaxSlider" class="price-slider price-slider-max" min="0" max="50000" step="100" value="${f.priceMax || 50000}" oninput="updatePriceSlider('mobile')">
+                        </div>
                     </div>
                 </div>
 
@@ -1170,19 +1187,19 @@ const App = {
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Condition</label>
                     <div class="mobile-filter-chips">
-                        <button class="filter-chip ${f.condition === '' ? 'active' : ''}" onclick="App.filters.condition='';App.render();">Any</button>
-                        <button class="filter-chip ${f.condition === 'new' ? 'active' : ''}" onclick="App.filters.condition='new';App.render();">New</button>
-                        <button class="filter-chip ${f.condition === 'used' ? 'active' : ''}" onclick="App.filters.condition='used';App.render();">Used</button>
+                        <button class="filter-chip ${f.condition === '' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="">Any</button>
+                        <button class="filter-chip ${f.condition === 'new' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="new">New</button>
+                        <button class="filter-chip ${f.condition === 'used' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="used">Used</button>
                     </div>
                 </div>
 
                 <!-- Sale Type -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Sale Type</label>
-                    <div class="mobile-filter-chips">
-                        <button class="filter-chip ${f.saleType === '' ? 'active' : ''}" onclick="App.filters.saleType='';App.render();">All</button>
-                        <button class="filter-chip ${f.saleType === 'buynow' ? 'active' : ''}" onclick="App.filters.saleType='buynow';App.render();">Buy Now</button>
-                        <button class="filter-chip ${f.saleType === 'auction' ? 'active' : ''}" onclick="App.filters.saleType='auction';App.render();">Auction</button>
+                    <div class="mobile-filter-chips" id="mobileSaleTypeChips">
+                        <button class="filter-chip ${f.saleType === '' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="">All</button>
+                        <button class="filter-chip ${f.saleType === 'buynow' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="buynow">Buy Now</button>
+                        <button class="filter-chip ${f.saleType === 'auction' ? 'active' : ''}" onclick="this.parentElement.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');" data-value="auction">Auction</button>
                     </div>
                 </div>
 
@@ -1190,12 +1207,12 @@ const App = {
                 <!-- Vehicle Specific -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Vehicle Details</label>
-                    <input type="text" class="form-input" placeholder="Make (e.g. Toyota)" value="${f.make}" onchange="App.filters.make=this.value;" style="margin-bottom:8px;">
-                    <input type="text" class="form-input" placeholder="Model (e.g. Corolla)" value="${f.model}" onchange="App.filters.model=this.value;" style="margin-bottom:8px;">
+                    <input type="text" class="form-input" placeholder="Make (e.g. Toyota)" id="mobileVehicleMake" value="${f.make}" style="margin-bottom:8px;">
+                    <input type="text" class="form-input" placeholder="Model (e.g. Corolla)" id="mobileVehicleModel" value="${f.model}" style="margin-bottom:8px;">
                     <div class="mobile-price-inputs">
-                        <input type="number" class="form-input" placeholder="Year from" value="${f.yearMin}" onchange="App.filters.yearMin=this.value;">
+                        <input type="number" class="form-input" placeholder="Year from" id="mobileVehicleYearMin" value="${f.yearMin}">
                         <span>to</span>
-                        <input type="number" class="form-input" placeholder="Year to" value="${f.yearMax}" onchange="App.filters.yearMax=this.value;">
+                        <input type="number" class="form-input" placeholder="Year to" id="mobileVehicleYearMax" value="${f.yearMax}">
                     </div>
                 </div>
                 ` : ''}
@@ -1205,14 +1222,14 @@ const App = {
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Property Details</label>
                     <div class="mobile-price-inputs" style="margin-bottom:8px;">
-                        <select class="form-input form-select" onchange="App.filters.bedrooms=this.value;">
+                        <select class="form-input form-select" id="mobilePropertyBedrooms">
                             <option value="">Bedrooms</option>
                             <option value="1" ${f.bedrooms === '1' ? 'selected' : ''}>1+</option>
                             <option value="2" ${f.bedrooms === '2' ? 'selected' : ''}>2+</option>
                             <option value="3" ${f.bedrooms === '3' ? 'selected' : ''}>3+</option>
                             <option value="4" ${f.bedrooms === '4' ? 'selected' : ''}>4+</option>
                         </select>
-                        <select class="form-input form-select" onchange="App.filters.bathrooms=this.value;">
+                        <select class="form-input form-select" id="mobilePropertyBathrooms">
                             <option value="">Bathrooms</option>
                             <option value="1" ${f.bathrooms === '1' ? 'selected' : ''}>1+</option>
                             <option value="2" ${f.bathrooms === '2' ? 'selected' : ''}>2+</option>
@@ -1223,8 +1240,8 @@ const App = {
                 ` : ''}
             </div>
             <div class="mobile-filter-drawer-footer">
-                <button class="btn btn-ghost" onclick="App.clearFilters();toggleMobileFilters();">Clear All</button>
-                <button class="btn btn-primary" onclick="applyMobileFilters();">Show ${listings.length} Results</button>
+                <button class="btn btn-ghost" onclick="clearMobileFilters()">Clear All</button>
+                <button class="btn btn-primary" onclick="saveMobileFilters()">Show Results</button>
             </div>
         </div>
         <div class="mobile-filter-overlay" id="mobileFilterOverlay" onclick="toggleMobileFilters()"></div>
@@ -1303,12 +1320,17 @@ const App = {
                             <!-- Price Range -->
                             <div class="filter-group" style="margin-bottom:20px;">
                                 <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Price Range</label>
-                                <div style="display:flex;gap:8px;align-items:center;">
-                                    <input type="number" class="form-input" placeholder="Min" id="filterPriceMin" value="${f.priceMin}" style="width:100%;">
-                                    <span style="color:var(--slate-400);">-</span>
-                                    <input type="number" class="form-input" placeholder="Max" id="filterPriceMax" value="${f.priceMax}" style="width:100%;">
+                                <div class="price-slider-container">
+                                    <div class="price-slider-values">
+                                        <span>$<span id="desktopPriceMinDisplay">${f.priceMin || '0'}</span></span>
+                                        <span>$<span id="desktopPriceMaxDisplay">${f.priceMax || '50,000+'}</span></span>
+                                    </div>
+                                    <div class="price-slider-track">
+                                        <input type="range" id="desktopPriceMinSlider" class="price-slider price-slider-min" min="0" max="50000" step="100" value="${f.priceMin || 0}" oninput="updatePriceSlider('desktop')">
+                                        <input type="range" id="desktopPriceMaxSlider" class="price-slider price-slider-max" min="0" max="50000" step="100" value="${f.priceMax || 50000}" oninput="updatePriceSlider('desktop')">
+                                    </div>
                                 </div>
-                                <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;" onclick="App.filters.priceMin=document.getElementById('filterPriceMin').value;App.filters.priceMax=document.getElementById('filterPriceMax').value;App.render();">Apply Price</button>
+                                <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px;" onclick="App.filters.priceMin=document.getElementById('desktopPriceMinSlider').value;App.filters.priceMax=document.getElementById('desktopPriceMaxSlider').value=='50000'?'':document.getElementById('desktopPriceMaxSlider').value;App.render();">Apply Price</button>
                             </div>
 
                             <!-- Sale Type -->
@@ -3355,16 +3377,84 @@ function toggleMobileFilters() {
     }
 }
 
-function applyMobileFilters() {
-    // Get values from mobile filter inputs
-    const priceMin = document.getElementById('mobilePriceMin')?.value;
-    const priceMax = document.getElementById('mobilePriceMax')?.value;
+function updatePriceSlider(prefix) {
+    const minSlider = document.getElementById(`${prefix}PriceMinSlider`);
+    const maxSlider = document.getElementById(`${prefix}PriceMaxSlider`);
+    const minDisplay = document.getElementById(`${prefix}PriceMinDisplay`);
+    const maxDisplay = document.getElementById(`${prefix}PriceMaxDisplay`);
     
-    if (priceMin) App.filters.priceMin = priceMin;
-    if (priceMax) App.filters.priceMax = priceMax;
+    if (!minSlider || !maxSlider) return;
     
+    let minVal = parseInt(minSlider.value);
+    let maxVal = parseInt(maxSlider.value);
+    
+    // Prevent sliders from crossing
+    if (minVal > maxVal - 500) {
+        if (event.target === minSlider) {
+            minSlider.value = maxVal - 500;
+            minVal = maxVal - 500;
+        } else {
+            maxSlider.value = minVal + 500;
+            maxVal = minVal + 500;
+        }
+    }
+    
+    // Update displays
+    if (minDisplay) minDisplay.textContent = minVal.toLocaleString();
+    if (maxDisplay) maxDisplay.textContent = maxVal >= 50000 ? '50,000+' : maxVal.toLocaleString();
+}
+
+function saveMobileFilters() {
+    // Get all values from mobile filter form
+    App.searchQuery = document.getElementById('mobileSearchInput')?.value || '';
+    App.searchCategory = document.getElementById('mobileCategorySelect')?.value || '';
+    App.searchGroup = '';
+    App.filters.location = document.getElementById('mobileLocationSelect')?.value || '';
+    App.filters.sortBy = document.getElementById('mobileSortSelect')?.value || 'newest';
+    
+    // Price from sliders
+    const minPrice = document.getElementById('mobilePriceMinSlider')?.value || '';
+    const maxPrice = document.getElementById('mobilePriceMaxSlider')?.value || '';
+    App.filters.priceMin = minPrice === '0' ? '' : minPrice;
+    App.filters.priceMax = maxPrice === '50000' ? '' : maxPrice;
+    
+    // Condition from chips
+    const conditionChip = document.querySelector('.mobile-filter-section .mobile-filter-chips .filter-chip.active[data-value]');
+    App.filters.condition = conditionChip?.dataset.value || '';
+    
+    // Sale type from chips  
+    const saleTypeChip = document.querySelector('#mobileSaleTypeChips .filter-chip.active');
+    App.filters.saleType = saleTypeChip?.dataset.value || '';
+    
+    // Vehicle filters
+    if (document.getElementById('mobileVehicleMake')) {
+        App.filters.make = document.getElementById('mobileVehicleMake')?.value || '';
+        App.filters.model = document.getElementById('mobileVehicleModel')?.value || '';
+        App.filters.yearMin = document.getElementById('mobileVehicleYearMin')?.value || '';
+        App.filters.yearMax = document.getElementById('mobileVehicleYearMax')?.value || '';
+    }
+    
+    // Property filters
+    if (document.getElementById('mobilePropertyBedrooms')) {
+        App.filters.bedrooms = document.getElementById('mobilePropertyBedrooms')?.value || '';
+        App.filters.bathrooms = document.getElementById('mobilePropertyBathrooms')?.value || '';
+    }
+    
+    // Close drawer and render
     toggleMobileFilters();
     App.render();
+}
+
+function clearMobileFilters() {
+    App.searchQuery = '';
+    App.searchCategory = '';
+    App.searchGroup = '';
+    App.clearFilters();
+    toggleMobileFilters();
+}
+
+function applyMobileFilters() {
+    saveMobileFilters();
 }
 
 function toggleSubscriptionTier() {
