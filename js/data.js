@@ -2,31 +2,80 @@
 // iSQROLL - Data & Seed Functions
 // ============================================
 
+// Category Groups - matching iSQROLL's exact structure
+const CATEGORY_GROUPS = [
+    { id: 'market-hub', name: 'Market Hub', icon: '🏪' },
+    { id: 'automotive', name: 'Automotive', icon: '🚗' },
+    { id: 'farming-machinery', name: 'Farming & Machinery', icon: '🚜' },
+    { id: 'property', name: 'Property', icon: '🏠' },
+    { id: 'services', name: 'Services & Advertisements', icon: '📢' },
+    { id: 'occupations', name: 'Occupations', icon: '💼' }
+];
+
+// Full category list with parent groups
 const CATEGORIES = [
-    { id: 'antiques', name: 'Antiques & Collectables', icon: '🏺', order: 1 },
-    { id: 'art', name: 'Art', icon: '🎨', order: 2 },
-    { id: 'baby', name: 'Baby Gear', icon: '🍼', order: 3 },
-    { id: 'books', name: 'Books', icon: '📚', order: 4 },
-    { id: 'building', name: 'Building & Renovation', icon: '🔨', order: 5 },
-    { id: 'business', name: 'Business & Farming', icon: '🚜', order: 6 },
-    { id: 'clothing', name: 'Clothing & Fashion', icon: '👗', order: 7 },
-    { id: 'computers', name: 'Computers', icon: '💻', order: 8 },
-    { id: 'crafts', name: 'Crafts', icon: '✂️', order: 9 },
-    { id: 'electronics', name: 'Electronics & Photography', icon: '📷', order: 10 },
-    { id: 'gaming', name: 'Gaming', icon: '🎮', order: 11 },
-    { id: 'health', name: 'Health & Beauty', icon: '💄', order: 12 },
-    { id: 'home', name: 'Home & Living', icon: '🏠', order: 13 },
-    { id: 'jewellery', name: 'Jewellery & Watches', icon: '💎', order: 14 },
-    { id: 'mobile', name: 'Mobile Phones', icon: '📱', order: 15 },
-    { id: 'movies', name: 'Movies & TV', icon: '🎬', order: 16 },
-    { id: 'music', name: 'Music & Instruments', icon: '🎸', order: 17 },
-    { id: 'pets', name: 'Pets & Animals', icon: '🐕', order: 18 },
-    { id: 'sports', name: 'Sports & Outdoors', icon: '⚽', order: 19 },
-    { id: 'toys', name: 'Toys & Models', icon: '🧸', order: 20 },
-    { id: 'vehicles', name: 'Vehicles & Parts', icon: '🚗', order: 21 },
-    { id: 'services', name: 'Services', icon: '🛠️', order: 22 },
-    { id: 'travel', name: 'Travel & Events', icon: '✈️', order: 23 },
-    { id: 'other', name: 'Everything Else', icon: '📦', order: 24 }
+    // MARKET HUB
+    { id: 'dollar-reserve', name: '$1 Reserve', icon: '💵', group: 'market-hub', order: 1 },
+    { id: 'art-antiques', name: 'Art, Antiques, Collectables', icon: '🏺', group: 'market-hub', order: 2 },
+    { id: 'auto-parts', name: 'Automotive Parts', icon: '🔧', group: 'market-hub', order: 3 },
+    { id: 'books-magazines', name: 'Books & Magazines', icon: '📚', group: 'market-hub', order: 4 },
+    { id: 'building-renovation', name: 'Building & Renovation', icon: '🔨', group: 'market-hub', order: 5 },
+    { id: 'electronics', name: 'Electronics', icon: '📱', group: 'market-hub', order: 6 },
+    { id: 'health-beauty', name: 'Health & Beauty', icon: '💄', group: 'market-hub', order: 7 },
+    { id: 'home-living', name: 'Home & Living', icon: '🛋️', group: 'market-hub', order: 8 },
+    { id: 'hunting-fishing', name: 'Hunting & Fishing', icon: '🎣', group: 'market-hub', order: 9 },
+    { id: 'music-instruments', name: 'Music & Instruments', icon: '🎸', group: 'market-hub', order: 10 },
+    { id: 'jewellery-watches', name: 'Jewellery & Watches', icon: '💎', group: 'market-hub', order: 11 },
+    { id: 'clothing', name: 'Clothing', icon: '👕', group: 'market-hub', order: 12 },
+    { id: 'party-events', name: 'Party & Costume & Events', icon: '🎉', group: 'market-hub', order: 13 },
+    { id: 'pets-animals', name: 'Pets & Animals', icon: '🐕', group: 'market-hub', order: 14 },
+    { id: 'sports-outdoors', name: 'Sports & Outdoors', icon: '⚽', group: 'market-hub', order: 15 },
+    
+    // AUTOMOTIVE
+    { id: 'vehicle', name: 'Vehicle', icon: '🚙', group: 'automotive', order: 16, listingType: 'vehicle' },
+    { id: 'off-road-bike', name: 'Off-Road Bike', icon: '🏍️', group: 'automotive', order: 17, listingType: 'vehicle' },
+    { id: 'motorcycle', name: 'Motorcycle', icon: '🏍️', group: 'automotive', order: 18, listingType: 'vehicle' },
+    { id: 'marine', name: 'Marine', icon: '🚤', group: 'automotive', order: 19, listingType: 'vehicle' },
+    { id: 'quad-atv', name: 'Quad & ATV', icon: '🏎️', group: 'automotive', order: 20, listingType: 'vehicle' },
+    { id: 'auto-other', name: 'Other', icon: '🚗', group: 'automotive', order: 21 },
+    
+    // FARMING & MACHINERY
+    { id: 'everything-machinery', name: 'Everything Machinery', icon: '⚙️', group: 'farming-machinery', order: 22, listingType: 'vehicle' },
+    { id: 'farming', name: 'Farming', icon: '🌾', group: 'farming-machinery', order: 23 },
+    { id: 'farm-bikes-vehicles', name: 'Farm Bikes & Vehicles', icon: '🚜', group: 'farming-machinery', order: 24, listingType: 'vehicle' },
+    { id: 'farming-other', name: 'Other', icon: '🔩', group: 'farming-machinery', order: 25 },
+    
+    // PROPERTY
+    { id: 'residential', name: 'Residential', icon: '🏡', group: 'property', order: 26, listingType: 'property' },
+    { id: 'rural', name: 'Rural', icon: '🏞️', group: 'property', order: 27, listingType: 'property' },
+    { id: 'section', name: 'Section', icon: '📐', group: 'property', order: 28, listingType: 'property' },
+    { id: 'farm-land', name: 'Farm Land', icon: '🌻', group: 'property', order: 29, listingType: 'property' },
+    { id: 'lifestyle-block', name: 'Life Style Block', icon: '🏕️', group: 'property', order: 30, listingType: 'property' },
+    { id: 'apartment', name: 'Apartment', icon: '🏢', group: 'property', order: 31, listingType: 'property' },
+    { id: 'room', name: 'Room', icon: '🚪', group: 'property', order: 32, listingType: 'property' },
+    { id: 'shed', name: 'Shed', icon: '🏚️', group: 'property', order: 33, listingType: 'property' },
+    { id: 'commercial', name: 'Commercial', icon: '🏬', group: 'property', order: 34, listingType: 'property' },
+    { id: 'lease', name: 'Lease', icon: '📝', group: 'property', order: 35, listingType: 'property' },
+    { id: 'rental', name: 'Rental', icon: '🔑', group: 'property', order: 36, listingType: 'property' },
+    { id: 'property-other', name: 'Other', icon: '🏠', group: 'property', order: 37, listingType: 'property' },
+    
+    // SERVICES & ADVERTISEMENTS
+    { id: 'business-advertising', name: 'Business Advertising', icon: '📣', group: 'services', order: 38 },
+    { id: 'services-general', name: 'Services', icon: '🛠️', group: 'services', order: 39 },
+    
+    // OCCUPATIONS (Jobs)
+    { id: 'job-accounting', name: 'Accounting', icon: '📊', group: 'occupations', order: 40, listingType: 'job' },
+    { id: 'job-agriculture', name: 'Agriculture, Forestry', icon: '🌲', group: 'occupations', order: 41, listingType: 'job' },
+    { id: 'job-fishing', name: 'Fishing', icon: '🐟', group: 'occupations', order: 42, listingType: 'job' },
+    { id: 'job-mechanics', name: 'Mechanics & Automotive', icon: '🔧', group: 'occupations', order: 43, listingType: 'job' },
+    { id: 'job-finance', name: 'Finance And Accounting', icon: '💰', group: 'occupations', order: 44, listingType: 'job' },
+    { id: 'job-roadworks', name: 'Road Works', icon: '🚧', group: 'occupations', order: 45, listingType: 'job' },
+    { id: 'job-construction', name: 'Construction', icon: '👷', group: 'occupations', order: 46, listingType: 'job' },
+    { id: 'job-building', name: 'Building', icon: '🏗️', group: 'occupations', order: 47, listingType: 'job' },
+    { id: 'job-trades', name: 'Trades & Services', icon: '⚡', group: 'occupations', order: 48, listingType: 'job' },
+    { id: 'job-hospitality', name: 'Hospitality', icon: '🍽️', group: 'occupations', order: 49, listingType: 'job' },
+    { id: 'job-property', name: 'Property', icon: '🏘️', group: 'occupations', order: 50, listingType: 'job' },
+    { id: 'job-other', name: 'Other', icon: '💼', group: 'occupations', order: 51, listingType: 'job' }
 ];
 
 const NZ_REGIONS = [
@@ -36,223 +85,528 @@ const NZ_REGIONS = [
     'Otago', 'Southland'
 ];
 
-const SAMPLE_LISTINGS = [
+// Demo credentials
+const DEMO_CREDENTIALS = {
+    email: 'demo@isqroll.co.nz',
+    password: 'demo123'
+};
+
+// ============================================
+// SAMPLE LISTINGS - Vehicle Type
+// ============================================
+const VEHICLE_LISTINGS = [
     {
-        title: 'iPhone 15 Pro Max 256GB - Natural Titanium',
-        price: 1599, wasPrice: 1899, category: 'mobile',
-        location: 'Auckland', suburb: 'Ponsonby',
-        description: 'Selling my iPhone 15 Pro Max in Natural Titanium. Purchased October 2024. Battery health 98%. Includes box, cable, receipt. No trades.',
-        images: ['https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800'],
-        condition: 'Like New', brand: 'Apple', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free shipping' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 342, watchers: 28
+        title: '2019 Great Wall Steed 4x2',
+        price: 13995,
+        category: 'vehicle',
+        listingType: 'vehicle',
+        location: 'Whanganui',
+        suburb: 'Whanganui',
+        description: 'Great Wall Steed in excellent condition. Well maintained with full service history. Perfect for work or lifestyle use. NZ new vehicle.',
+        images: ['https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=800'],
+        // Vehicle-specific fields
+        make: 'GREAT WALL',
+        model: 'Steed',
+        bodyType: 'Ute',
+        doors: 5,
+        previousOwners: 'NZ New',
+        year: 2019,
+        odometer: 69604,
+        colour: 'White',
+        condition: 'Used',
+        engineCC: 2378,
+        fuelType: 'Petrol',
+        transmission: 'Manual',
+        wofExpiry: '05/02/2026',
+        regoExpiry: '15/03/2026',
+        // Background checks
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 234,
+        featured: true
     },
     {
-        title: 'Mid-Century Leather Sofa - 3 Seater Tan',
-        price: 1450, wasPrice: null, category: 'home',
-        location: 'Wellington', suburb: 'Karori',
-        description: 'Beautiful mid-century leather sofa. 210cm wide. Genuine top-grain leather, solid oak legs. Some natural patina. Pick up only.',
-        images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800'],
-        condition: 'Good', brand: null, featured: false,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Pick up only' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 189, watchers: 15
+        title: '2015 Toyota Prius Hybrid - Taxi Business Opportunity',
+        price: 15000,
+        category: 'vehicle',
+        listingType: 'vehicle',
+        location: 'Whanganui',
+        suburb: 'Whanganui',
+        description: 'Business Opportunity for 2026 – Owner/Driver Taxi Business for Sale. What\'s Included: 2015 Toyota Prius Hatchback with Warrant of Fitness, Registration. Odometer: 386,XXX km. Automatic transmission. Petrol hybrid 1790cc engine. Vehicle is fully operational with all running gear. Contract with River City Cabs generates over $100,000 per year.',
+        images: ['https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=800'],
+        make: 'TOYOTA',
+        model: 'Prius',
+        bodyType: 'Hatchback',
+        doors: 5,
+        previousOwners: '2',
+        year: 2015,
+        odometer: 386000,
+        colour: 'White',
+        condition: 'Used',
+        engineCC: 1790,
+        fuelType: 'Petrol Hybrid',
+        transmission: 'Automatic',
+        wofExpiry: '12/06/2026',
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 1120,
+        featured: true
     },
     {
-        title: 'Giant Talon 2 Mountain Bike - Large',
-        price: 899, wasPrice: 1299, category: 'sports',
-        location: 'Christchurch', suburb: 'Riccarton',
-        description: 'Giant Talon 2 hardtail. Size Large. Shimano Deore 2x9. Recently serviced with new brake pads and chain. Great for trails!',
-        images: ['https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800'],
-        condition: 'Excellent', brand: 'Giant', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 65, note: 'BikeBox shipping' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 523, watchers: 42
+        title: '2022 Mazda CX-5 GSX AWD',
+        price: 42990,
+        category: 'vehicle',
+        listingType: 'vehicle',
+        location: 'Auckland',
+        suburb: 'Penrose',
+        description: 'Low km Mazda CX-5 GSX in Soul Red. One owner, full dealer service history. Leather interior, heated seats, Apple CarPlay. Balance of factory warranty.',
+        images: ['https://images.unsplash.com/photo-1606611013016-969c19ba27bb?w=800'],
+        make: 'MAZDA',
+        model: 'CX-5 GSX',
+        bodyType: 'SUV',
+        doors: 5,
+        previousOwners: '1',
+        year: 2022,
+        odometer: 28500,
+        colour: 'Soul Red',
+        condition: 'Used',
+        engineCC: 2488,
+        fuelType: 'Petrol',
+        transmission: 'Automatic',
+        wofExpiry: '22/09/2026',
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 567,
+        featured: true
     },
     {
-        title: 'Nike Air Jordan 1 Chicago - US 10 - DS',
-        price: 420, wasPrice: null, category: 'clothing',
-        location: 'Hamilton', suburb: 'Central',
-        description: 'Air Jordan 1 Retro High OG Chicago. Size US 10. Deadstock, never worn. 100% authentic from Nike SNKRS. Price firm.',
-        images: ['https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800'],
-        condition: 'New', brand: 'Nike', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 12, note: 'Tracked shipping' },
-        payment: ['bank'], acceptsOffers: false, views: 892, watchers: 67
+        title: '2018 Ford Ranger Wildtrak',
+        price: 52995,
+        category: 'vehicle',
+        listingType: 'vehicle',
+        location: 'Hamilton',
+        suburb: 'Te Rapa',
+        description: 'Ford Ranger Wildtrak 3.2L Turbo Diesel. Canopy, towbar, sports bar. One owner, full Ford service history. Ready for work or play.',
+        images: ['https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=800'],
+        make: 'FORD',
+        model: 'Ranger Wildtrak',
+        bodyType: 'Ute',
+        doors: 4,
+        previousOwners: '1',
+        year: 2018,
+        odometer: 89000,
+        colour: 'Shadow Black',
+        condition: 'Used',
+        engineCC: 3198,
+        fuelType: 'Diesel',
+        transmission: 'Automatic',
+        wofExpiry: '18/04/2026',
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 892,
+        featured: false
     },
     {
-        title: 'PS5 Disc + 2 Controllers + Spider-Man 2',
-        price: 749, wasPrice: 899, category: 'gaming',
-        location: 'Auckland', suburb: 'Mt Eden',
-        description: 'PlayStation 5 Disc Edition bundle. 2x DualSense controllers. Spider-Man 2 included. All cables and box. No stick drift.',
-        images: ['https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=800'],
-        condition: 'Excellent', brand: 'Sony', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 25, note: 'Insured shipping' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 1234, watchers: 89
+        title: 'TH TH554-D Tractor 4WD 2019',
+        price: 12500,
+        category: 'everything-machinery',
+        listingType: 'vehicle',
+        location: 'Napier',
+        suburb: 'Napier South',
+        description: 'This Diesel tractor was imported by my Dad directly from China. He had a plan to use it for a specific job which never eventuated, so it has sat quietly in his shed ever since. It has a 55Hp Diesel engine and is 4 Wheel Drive which would make it very handy for various applications. It has Hydraulics and a PTO. Happy to accept trade in cars, utes, vans, SUV\'s.',
+        images: ['https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?w=800'],
+        make: 'TH',
+        model: 'TH554-D',
+        bodyType: 'Tractor 4WD',
+        seats: -1,
+        previousOwners: 'Ex-Overseas',
+        year: 2019,
+        colour: 'Blue',
+        condition: 'Used',
+        engineSize: -1,
+        transmission: 'Manual',
+        regoExpiry: '01/01/1900',
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 9,
+        featured: false
     },
     {
-        title: 'Teak Outdoor Dining Set - 6 Seater',
-        price: 1200, wasPrice: 2499, category: 'home',
-        location: 'Tauranga', suburb: 'Mt Maunganui',
-        description: 'Solid teak dining set with 6 chairs and Sunbrella cushions. Table 180x90cm. Regularly oiled. Originally $2,499 from Freedom.',
-        images: ['https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=800'],
-        condition: 'Good', brand: 'Freedom', featured: false,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Pick up only' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 456, watchers: 34
-    },
-    {
-        title: 'Canon EOS R5 Body - Low Shutter Count',
-        price: 4299, wasPrice: null, category: 'electronics',
-        location: 'Wellington', suburb: 'Newtown',
-        description: 'Canon EOS R5. Only 4,892 actuations. 45MP sensor, 8K video, IBIS. Immaculate condition. Box, battery, charger included.',
-        images: ['https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=800'],
-        condition: 'Like New', brand: 'Canon', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free insured shipping' },
-        payment: ['bank'], acceptsOffers: true, views: 678, watchers: 52
-    },
-    {
-        title: 'DHD Surfboard 6\'2" Shortboard',
-        price: 420, wasPrice: 650, category: 'sports',
-        location: 'Raglan', suburb: 'Raglan',
-        description: 'DHD shortboard. 6\'2" x 19" x 2.5". Squash tail, 5-fin FCS II setup. Fins included. Minor pressure dings. Great for Raglan!',
-        images: ['https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=800'],
-        condition: 'Good', brand: 'DHD', featured: false,
-        shipping: { pickup: true, nationwide: true, cost: 45, note: 'Board bag shipping' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 234, watchers: 18
-    },
-    {
-        title: 'Louis Vuitton Neverfull MM - Authentic',
-        price: 1899, wasPrice: null, category: 'clothing',
-        location: 'Auckland', suburb: 'Remuera',
-        description: 'Authentic LV Neverfull MM Damier Ebene. Date code AR3198 (France 2018). Excellent condition. Dust bag and receipt included.',
-        images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=800'],
-        condition: 'Excellent', brand: 'Louis Vuitton', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free insured shipping' },
-        payment: ['bank'], acceptsOffers: false, views: 1456, watchers: 98
-    },
-    {
-        title: 'LEGO UCS Millennium Falcon 75192',
-        price: 1100, wasPrice: null, category: 'toys',
-        location: 'Dunedin', suburb: 'Roslyn',
-        description: 'UCS Millennium Falcon - 7,541 pieces! 100% complete with all 7 minifigures. Built once for display. Box and instructions included.',
-        images: ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'],
-        condition: 'Like New', brand: 'LEGO', featured: false,
-        shipping: { pickup: true, nationwide: true, cost: 35, note: 'Careful packaging' },
-        payment: ['bank'], acceptsOffers: true, views: 567, watchers: 43
-    },
-    {
-        title: '2019 Toyota Corolla GLX - 42,000km',
-        price: 23500, wasPrice: null, category: 'vehicles',
-        location: 'Auckland', suburb: 'Greenlane',
-        description: '2019 Corolla GLX Hatch. 42,000km. Full dealer history. Apple CarPlay, safety sense, reversing camera. One owner, always garaged.',
-        images: ['https://images.unsplash.com/photo-1623869675781-80aa31012a5a?w=800'],
-        condition: 'Excellent', brand: 'Toyota', featured: true,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Test drives welcome' },
-        payment: ['bank'], acceptsOffers: true, views: 2341, watchers: 156
-    },
-    {
-        title: 'MacBook Pro 14" M3 Pro - Space Black',
-        price: 3199, wasPrice: 3699, category: 'computers',
-        location: 'Wellington', suburb: 'Te Aro',
-        description: 'MacBook Pro 14" M3 Pro, 18GB RAM, 512GB SSD. AppleCare+ until Nov 2027. Only 23 battery cycles. Zero scratches. Box included.',
-        images: ['https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800'],
-        condition: 'Like New', brand: 'Apple', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free insured shipping' },
-        payment: ['bank'], acceptsOffers: true, views: 892, watchers: 78
-    },
-    {
-        title: 'Breville Barista Express Coffee Machine',
-        price: 549, wasPrice: 799, category: 'home',
-        location: 'Auckland', suburb: 'Grey Lynn',
-        description: 'Breville Barista Express. Integrated grinder, 15 bar pump, steam wand. All accessories included. Great condition, excellent coffee.',
-        images: ['https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=800'],
-        condition: 'Excellent', brand: 'Breville', featured: false,
-        shipping: { pickup: true, nationwide: true, cost: 20, note: 'Carefully packed' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 445, watchers: 38
-    },
-    {
-        title: 'Fender Player Stratocaster Sunburst',
-        price: 1150, wasPrice: null, category: 'music',
-        location: 'Auckland', suburb: 'Kingsland',
-        description: 'Fender Player Strat MIM. 3-Color Sunburst. Alder body, maple neck. Minimal fret wear. Plays and sounds amazing. Gig bag included.',
-        images: ['https://images.unsplash.com/photo-1564186763535-ebb21ef5277f?w=800'],
-        condition: 'Excellent', brand: 'Fender', featured: false,
-        shipping: { pickup: true, nationwide: true, cost: 30, note: 'Hardcase shipping' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 312, watchers: 24
-    },
-    {
-        title: 'Dyson V15 Detect Absolute Vacuum',
-        price: 799, wasPrice: 1199, category: 'home',
-        location: 'Christchurch', suburb: 'Merivale',
-        description: 'Dyson V15 Detect. Laser reveals dust, piezo sensor, LCD screen. Up to 60 mins runtime. All attachments. Moving overseas.',
-        images: ['https://images.unsplash.com/photo-1558317374-067fb5f30001?w=800'],
-        condition: 'Excellent', brand: 'Dyson', featured: false,
-        shipping: { pickup: true, nationwide: true, cost: 15, note: 'Original box' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 534, watchers: 45
-    },
-    {
-        title: 'Samsung 65" QN85B Neo QLED 4K TV',
-        price: 1599, wasPrice: 2499, category: 'electronics',
-        location: 'Auckland', suburb: 'Newmarket',
-        description: 'Samsung 65" Neo QLED. Quantum Matrix, Object Tracking Sound, Gaming Hub 120Hz. No dead pixels. Wall mount included.',
-        images: ['https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=800'],
-        condition: 'Excellent', brand: 'Samsung', featured: true,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Pick up only' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 789, watchers: 56
-    },
-    {
-        title: 'Weber Genesis II E-310 BBQ - 3 Burner',
-        price: 899, wasPrice: 1399, category: 'home',
-        location: 'Tauranga', suburb: 'Papamoa',
-        description: 'Weber Genesis II E-310. 3 burners, 39,000 BTU. Cast iron grates, infinity ignition. Cover and gas bottle included. Moving to apartment.',
-        images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800'],
-        condition: 'Excellent', brand: 'Weber', featured: false,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Pick up only' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 423, watchers: 31
-    },
-    {
-        title: 'DJI Mini 3 Pro - Fly More Combo',
-        price: 1199, wasPrice: 1599, category: 'electronics',
-        location: 'Wellington', suburb: 'Miramar',
-        description: 'DJI Mini 3 Pro with RC controller. 3 batteries, charging hub, shoulder bag. Under 250g - no registration needed! Only 10 flights.',
-        images: ['https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=800'],
-        condition: 'Like New', brand: 'DJI', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free insured shipping' },
-        payment: ['bank'], acceptsOffers: true, views: 667, watchers: 48
-    },
-    {
-        title: 'Eames Style Lounge Chair & Ottoman',
-        price: 1800, wasPrice: null, category: 'home',
-        location: 'Auckland', suburb: 'Ponsonby',
-        description: 'Eames-style lounge chair with ottoman. Black genuine leather, walnut veneer, polished aluminum. Very comfortable! Originally $3,200.',
-        images: ['https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=800'],
-        condition: 'Excellent', brand: null, featured: false,
-        shipping: { pickup: true, nationwide: false, cost: null, note: 'Pick up Ponsonby' },
-        payment: ['bank', 'cash'], acceptsOffers: true, views: 398, watchers: 29
-    },
-    {
-        title: 'Apple Watch Ultra 2 - Orange Alpine',
-        price: 1099, wasPrice: 1399, category: 'electronics',
-        location: 'Auckland', suburb: 'CBD',
-        description: 'Apple Watch Ultra 2. 49mm titanium, 3000 nit display, dual GPS, 36hr battery. Orange Alpine Loop (M). Box and charger included.',
-        images: ['https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800'],
-        condition: 'Like New', brand: 'Apple', featured: true,
-        shipping: { pickup: true, nationwide: true, cost: 0, note: 'Free shipping' },
-        payment: ['bank'], acceptsOffers: true, views: 534, watchers: 41
+        title: '2020 Suzuki Swift Sport 1.4T',
+        price: 26990,
+        category: 'vehicle',
+        listingType: 'vehicle',
+        location: 'Wellington',
+        suburb: 'Lower Hutt',
+        description: 'Suzuki Swift Sport in Championship Yellow. 1.4L Turbo, 6-speed manual. Sports seats, climate control, reverse camera. Great fun daily driver!',
+        images: ['https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800'],
+        make: 'SUZUKI',
+        model: 'Swift Sport',
+        bodyType: 'Hatchback',
+        doors: 5,
+        previousOwners: '1',
+        year: 2020,
+        odometer: 45000,
+        colour: 'Championship Yellow',
+        condition: 'Used',
+        engineCC: 1373,
+        fuelType: 'Petrol',
+        transmission: 'Manual',
+        wofExpiry: '30/11/2026',
+        stolenCheck: 'Passed',
+        damageCheck: 'Passed',
+        views: 423,
+        featured: false
     }
 ];
 
-const SAMPLE_SELLERS = [
-    { name: 'Mike Chen', location: 'Auckland', rating: 4.9, reviews: 156, verified: true },
-    { name: 'Sarah Williams', location: 'Wellington', rating: 4.7, reviews: 43, verified: true },
-    { name: 'James Taylor', location: 'Christchurch', rating: 4.8, reviews: 89, verified: true },
-    { name: 'Lisa Park', location: 'Hamilton', rating: 5.0, reviews: 234, verified: true },
-    { name: 'David Brown', location: 'Auckland', rating: 4.6, reviews: 67, verified: false },
-    { name: 'Emma Wilson', location: 'Tauranga', rating: 4.9, reviews: 112, verified: true },
-    { name: 'Tom Anderson', location: 'Wellington', rating: 5.0, reviews: 78, verified: true },
-    { name: 'Jack Morrison', location: 'Raglan', rating: 4.7, reviews: 34, verified: false },
-    { name: 'Sophie Lee', location: 'Auckland', rating: 4.9, reviews: 167, verified: true },
-    { name: 'Ryan Hughes', location: 'Dunedin', rating: 5.0, reviews: 45, verified: true }
+// ============================================
+// SAMPLE LISTINGS - Property Type
+// ============================================
+const PROPERTY_LISTINGS = [
+    {
+        title: 'Old Soul, New Heart - Character Home',
+        price: null, // Price by negotiation
+        priceDisplay: 'Price by Negotiation',
+        category: 'residential',
+        listingType: 'property',
+        location: 'Whanganui',
+        suburb: 'Whanganui Central',
+        description: 'On a flat section in a quiet street sits this Kiwi classic, an early 1900s home that blends timeless character with modern-day upgrades. Step inside and you\'ll find three generous double bedrooms and spacious living, with original features flowing from the polished floors through to the high ceilings. Recent upgrades to the wiring, kitchen, and bathroom ensure peace of mind and everyday comfort. The kitchen is truly the heart of this home, complete with a large stacker window that opens seamlessly to a covered outdoor entertaining area.',
+        images: ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800'],
+        // Property-specific fields
+        bedrooms: 3,
+        bathrooms: 1,
+        livingAreas: 1,
+        garageParking: true,
+        offStreetParking: false,
+        landArea: null,
+        floorArea: null,
+        propertyType: 'House',
+        // Agent info
+        agentName: 'Shannon Jury',
+        agentCompany: 'Harcourts Whanganui',
+        agentLogo: 'https://via.placeholder.com/200x60?text=Harcourts',
+        agentWebsite: 'https://harcourts.net/nz/office/whanganui',
+        views: 541,
+        featured: true
+    },
+    {
+        title: 'Modern Family Home - 4 Bed 2 Bath',
+        price: 679000,
+        category: 'residential',
+        listingType: 'property',
+        location: 'Palmerston North',
+        suburb: 'Hokowhitu',
+        description: 'Spacious modern family home in sought-after Hokowhitu. Open plan living flows to sunny north-facing deck. Master with ensuite and walk-in robe. Double garage with internal access. Heat pump and gas fire. Close to schools and river walkway.',
+        images: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800'],
+        bedrooms: 4,
+        bathrooms: 2,
+        livingAreas: 2,
+        garageParking: true,
+        offStreetParking: true,
+        landArea: 650,
+        floorArea: 185,
+        propertyType: 'House',
+        agentName: 'Sarah Mitchell',
+        agentCompany: 'Ray White Manawatu',
+        views: 892,
+        featured: true
+    },
+    {
+        title: 'Lifestyle Block - 4.5 Hectares',
+        price: 895000,
+        category: 'lifestyle-block',
+        listingType: 'property',
+        location: 'Waikato',
+        suburb: 'Te Awamutu',
+        description: '4.5 hectares of flat to rolling land with established 3 bedroom home. Large shed with power. Excellent water supply. Currently running sheep and cattle. Subdivision potential (STCA).',
+        images: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'],
+        bedrooms: 3,
+        bathrooms: 1,
+        livingAreas: 1,
+        garageParking: true,
+        offStreetParking: true,
+        landArea: 45000,
+        propertyType: 'Lifestyle',
+        agentName: 'Mike Thompson',
+        agentCompany: 'PGG Wrightson Real Estate',
+        views: 456,
+        featured: false
+    },
+    {
+        title: 'Investment Apartment - CBD Location',
+        price: 385000,
+        category: 'apartment',
+        listingType: 'property',
+        location: 'Wellington',
+        suburb: 'Te Aro',
+        description: '2 bedroom apartment in the heart of Wellington CBD. Currently tenanted at $550/week. Building has earthquake strengthening completed. Body corp $4,500 pa. Great investment or first home.',
+        images: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800'],
+        bedrooms: 2,
+        bathrooms: 1,
+        livingAreas: 1,
+        garageParking: false,
+        offStreetParking: false,
+        floorArea: 68,
+        propertyType: 'Apartment',
+        agentName: 'James Chen',
+        agentCompany: 'Tommy\'s Real Estate',
+        views: 234,
+        featured: false
+    },
+    {
+        title: 'Rural Section - Ready to Build',
+        price: 245000,
+        category: 'section',
+        listingType: 'property',
+        location: 'Manawatu-Whanganui',
+        suburb: 'Marton',
+        description: '2500sqm flat section with rural outlook. Power and water at boundary. Building platform in place. Covenants apply. 15 mins to Whanganui, 25 mins to Palmerston North.',
+        images: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800'],
+        bedrooms: null,
+        bathrooms: null,
+        landArea: 2500,
+        propertyType: 'Section',
+        agentName: 'Rachel Brown',
+        agentCompany: 'Bayleys',
+        views: 178,
+        featured: false
+    },
+    {
+        title: 'Room for Rent - Shared House',
+        price: 200,
+        priceDisplay: '$200/week',
+        category: 'room',
+        listingType: 'property',
+        location: 'Auckland',
+        suburb: 'Mt Eden',
+        description: 'Large sunny room in shared house. Fully furnished. Fibre internet included. 2 other professional flatmates. Close to train station and shops. Available now.',
+        images: ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800'],
+        bedrooms: 1,
+        bathrooms: null,
+        propertyType: 'Room',
+        agentName: 'Direct from Owner',
+        views: 89,
+        featured: false
+    }
 ];
 
-// Seed database function
+// ============================================
+// SAMPLE LISTINGS - General Items
+// ============================================
+const GENERAL_LISTINGS = [
+    {
+        title: 'Comfortable Rocking Chair - 360 Swivel',
+        price: 50,
+        category: 'home-living',
+        listingType: 'general',
+        location: 'Whanganui',
+        suburb: 'Tawhero',
+        description: 'Very comfortable rocking chair turns 360 degrees. Great condition.',
+        images: ['https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800'],
+        condition: 'New',
+        shipping: 'Pickup',
+        payment: 'Cash',
+        views: 80,
+        featured: false
+    },
+    {
+        title: 'Fishing Rod & Reel Combo - Shimano',
+        price: 185,
+        category: 'hunting-fishing',
+        listingType: 'general',
+        location: 'Tauranga',
+        suburb: 'Mt Maunganui',
+        description: 'Shimano Sienna spinning combo. 7ft medium rod with 2500 reel. Barely used, excellent condition. Perfect for surf or estuary fishing.',
+        images: ['https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800'],
+        condition: 'Excellent',
+        brand: 'Shimano',
+        shipping: 'Nationwide',
+        shippingCost: 15,
+        payment: 'Bank Transfer',
+        views: 156,
+        featured: false
+    },
+    {
+        title: 'iPhone 14 Pro 256GB - Deep Purple',
+        price: 1299,
+        category: 'electronics',
+        listingType: 'general',
+        location: 'Auckland',
+        suburb: 'Ponsonby',
+        description: 'iPhone 14 Pro in Deep Purple. 256GB storage. Battery health 94%. No scratches, always had screen protector and case. Includes box and cable.',
+        images: ['https://images.unsplash.com/photo-1678652197831-2d180705cd2c?w=800'],
+        condition: 'Excellent',
+        brand: 'Apple',
+        shipping: 'Nationwide',
+        shippingCost: 0,
+        payment: 'Bank Transfer',
+        views: 423,
+        featured: true
+    },
+    {
+        title: 'Stihl MS 251 Chainsaw',
+        price: 650,
+        category: 'farming',
+        listingType: 'general',
+        location: 'Rotorua',
+        suburb: 'Rotorua',
+        description: 'Stihl MS 251 chainsaw. 18" bar. Low hours, well maintained. Starts first pull. Great for firewood or property maintenance.',
+        images: ['https://images.unsplash.com/photo-1611068120813-eca5a8cbf793?w=800'],
+        condition: 'Good',
+        brand: 'Stihl',
+        shipping: 'Pickup',
+        payment: 'Cash',
+        views: 234,
+        featured: false
+    },
+    {
+        title: 'Kids Bike - 20" Apollo',
+        price: 75,
+        category: 'sports-outdoors',
+        listingType: 'general',
+        location: 'Christchurch',
+        suburb: 'Riccarton',
+        description: 'Apollo kids bike 20" wheels. Suit ages 6-9. Good condition, just outgrown. Some scratches but rides perfectly.',
+        images: ['https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=800'],
+        condition: 'Good',
+        brand: 'Apollo',
+        shipping: 'Pickup',
+        payment: 'Cash',
+        views: 67,
+        featured: false
+    },
+    {
+        title: 'Breville Barista Express Coffee Machine',
+        price: 599,
+        category: 'home-living',
+        listingType: 'general',
+        location: 'Wellington',
+        suburb: 'Karori',
+        description: 'Breville Barista Express. Makes excellent coffee! Includes all accessories and instruction manual. Selling due to upgrade.',
+        images: ['https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=800'],
+        condition: 'Excellent',
+        brand: 'Breville',
+        shipping: 'Nationwide',
+        shippingCost: 25,
+        payment: 'Bank Transfer',
+        views: 312,
+        featured: true
+    },
+    {
+        title: 'Husqvarna Ride-On Mower',
+        price: 4500,
+        category: 'everything-machinery',
+        listingType: 'general',
+        location: 'Hawkes Bay',
+        suburb: 'Hastings',
+        description: 'Husqvarna ride-on mower. 42" cut, hydrostatic drive. 200 hours. Serviced annually. Perfect for lifestyle block or large lawn.',
+        images: ['https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=800'],
+        condition: 'Excellent',
+        brand: 'Husqvarna',
+        shipping: 'Pickup',
+        payment: 'Bank Transfer',
+        views: 567,
+        featured: true
+    },
+    {
+        title: 'Weber Q2200 BBQ with Stand',
+        price: 450,
+        category: 'home-living',
+        listingType: 'general',
+        location: 'Auckland',
+        suburb: 'Albany',
+        description: 'Weber Q2200 BBQ with permanent cart. Excellent condition. Cast iron cooking grates. Cover included. Gas bottle not included.',
+        images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800'],
+        condition: 'Excellent',
+        brand: 'Weber',
+        shipping: 'Pickup',
+        payment: 'Cash',
+        views: 198,
+        featured: false
+    }
+];
+
+// ============================================
+// SAMPLE SELLERS
+// ============================================
+const SAMPLE_SELLERS = [
+    { 
+        name: 'Mike Baker Motors', 
+        location: 'Whanganui', 
+        rating: 100, 
+        reviews: 45, 
+        verified: true,
+        business: true,
+        website: 'www.mikebakermotors.co.nz'
+    },
+    { 
+        name: 'Kevin Murray', 
+        location: 'Whanganui', 
+        rating: 100, 
+        reviews: 12, 
+        verified: true,
+        business: false
+    },
+    { 
+        name: 'Evolution Motors', 
+        location: 'Napier', 
+        rating: 100, 
+        reviews: 89, 
+        verified: true,
+        business: true,
+        website: 'www.evolutionmotors.co.nz'
+    },
+    { 
+        name: 'Harcourts Whanganui', 
+        location: 'Whanganui', 
+        rating: 100, 
+        reviews: 156, 
+        verified: true,
+        business: true,
+        website: 'https://harcourts.net/nz/office/whanganui'
+    },
+    { 
+        name: 'Tara-marie Butters', 
+        location: 'Whanganui', 
+        rating: 100, 
+        reviews: 8, 
+        verified: true,
+        business: false
+    },
+    { 
+        name: 'Sarah Mitchell', 
+        location: 'Palmerston North', 
+        rating: 98, 
+        reviews: 67, 
+        verified: true,
+        business: false
+    },
+    { 
+        name: 'Dean McMillan', 
+        location: 'Napier', 
+        rating: 100, 
+        reviews: 34, 
+        verified: true,
+        business: false
+    },
+    { 
+        name: 'PGG Wrightson Real Estate', 
+        location: 'Te Awamutu', 
+        rating: 100, 
+        reviews: 234, 
+        verified: true,
+        business: true
+    }
+];
+
+// Combine all listings
+const SAMPLE_LISTINGS = [...VEHICLE_LISTINGS, ...PROPERTY_LISTINGS, ...GENERAL_LISTINGS];
+
+// ============================================
+// SEED DATABASE FUNCTION
+// ============================================
 async function seedDatabase() {
     console.log('🌱 Starting database seed...');
     
@@ -264,7 +618,14 @@ async function seedDatabase() {
         }
         console.log('✅ Categories added');
         
-        // 2. Create demo user
+        // 2. Seed category groups
+        console.log('📁 Seeding category groups...');
+        for (const group of CATEGORY_GROUPS) {
+            await db.collection('categoryGroups').doc(group.id).set(group);
+        }
+        console.log('✅ Category groups added');
+        
+        // 3. Create demo user
         console.log('👤 Creating demo user...');
         try {
             await auth.createUserWithEmailAndPassword(DEMO_CREDENTIALS.email, DEMO_CREDENTIALS.password);
@@ -276,17 +637,17 @@ async function seedDatabase() {
         await db.collection('users').doc('demo-user').set({
             email: DEMO_CREDENTIALS.email,
             displayName: 'Demo User',
-            location: 'Auckland',
-            phone: '021 123 4567',
+            location: 'Whanganui',
+            phone: '027 123 4567',
             bio: 'Demo account for testing iSQROLL!',
-            rating: 4.8,
-            reviews: 24,
+            rating: 100,
+            reviews: 5,
             verified: true,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         console.log('✅ Demo user created');
         
-        // 3. Seed listings
+        // 4. Seed listings
         console.log('📦 Seeding listings...');
         for (let i = 0; i < SAMPLE_LISTINGS.length; i++) {
             const listing = SAMPLE_LISTINGS[i];
@@ -299,9 +660,11 @@ async function seedDatabase() {
                 sellerRating: seller.rating,
                 sellerReviews: seller.reviews,
                 sellerVerified: seller.verified,
+                sellerBusiness: seller.business || false,
+                sellerWebsite: seller.website || null,
                 status: 'active',
                 createdAt: firebase.firestore.Timestamp.fromDate(
-                    new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000)
+                    new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000)
                 )
             });
         }
@@ -317,6 +680,31 @@ async function seedDatabase() {
     }
 }
 
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+// Get categories by group
+function getCategoriesByGroup(groupId) {
+    return CATEGORIES.filter(c => c.group === groupId);
+}
+
+// Get category group by ID
+function getCategoryGroup(groupId) {
+    return CATEGORY_GROUPS.find(g => g.id === groupId);
+}
+
+// Get category by ID
+function getCategory(categoryId) {
+    return CATEGORIES.find(c => c.id === categoryId);
+}
+
+// Export to window
 window.seedDatabase = seedDatabase;
 window.CATEGORIES = CATEGORIES;
+window.CATEGORY_GROUPS = CATEGORY_GROUPS;
 window.NZ_REGIONS = NZ_REGIONS;
+window.DEMO_CREDENTIALS = DEMO_CREDENTIALS;
+window.getCategoriesByGroup = getCategoriesByGroup;
+window.getCategoryGroup = getCategoryGroup;
+window.getCategory = getCategory;
