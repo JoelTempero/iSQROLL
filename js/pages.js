@@ -391,7 +391,7 @@ const Pages = {
             }
         ];
 
-        return \`
+        return `
         <div class="page-header">
             <div class="container">
                 <h1>Frequently Asked Questions</h1>
@@ -401,14 +401,14 @@ const Pages = {
 
         <section class="section" style="background:var(--white);">
             <div class="container" style="max-width:800px;">
-                \${faqs.map(faq => \`
+                ${faqs.map(faq => `
                 <div class="card" style="margin-bottom:16px;">
                     <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">\${faq.q}</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">\${faq.a}</p>
+                        <h3 style="margin-bottom:12px;">${faq.q}</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">${faq.a}</p>
                     </div>
                 </div>
-                \`).join('')}
+                `).join('')}
             </div>
         </section>
 
@@ -421,7 +421,7 @@ const Pages = {
                     <a href="mailto:info@isqroll.co.nz" class="btn btn-secondary btn-lg">Email info@isqroll.co.nz</a>
                 </div>
             </div>
-        </section>\`;
+        </section>`;
     },
 
     contact() {
