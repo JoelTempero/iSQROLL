@@ -35,9 +35,15 @@ const App = {
 
     async loadListings() {
         try {
-            const snap = await db.collection('listings').where('status', '==', 'active').orderBy('createdAt', 'desc').limit(50).get();
+            const snap = await db.collection('listings').where('status', '==', 'active').limit(50).get();
             this.listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        } catch (e) { this.listings = []; }
+            // Sort client-side instead (avoids needing Firestore composite index)
+            this.listings.sort((a, b) => {
+                const aTime = a.createdAt?.toDate?.() || new Date(0);
+                const bTime = b.createdAt?.toDate?.() || new Date(0);
+                return bTime - aTime;
+            });
+        } catch (e) { console.error('Load error:', e); this.listings = []; }
     },
 
     navigate(page, param = null) {
