@@ -1,55 +1,61 @@
-/* Mega Menu Styles - Add to main.css */
+/* Mega Menu Styles - Professional */
 
+/* Dropdown container */
 .nav-link-dropdown {
     position: relative;
+    display: flex;
+    align-items: center;
 }
 
+/* The mega menu - HIDDEN by default */
 .mega-menu {
+    display: none;
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    border: 1px solid var(--slate-200);
-    padding: 24px;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: 1000;
-    min-width: 800px;
+    left: 0;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    border: 1px solid #e5e7eb;
+    padding: 20px;
+    z-index: 9999;
+    min-width: 720px;
+    margin-top: 4px;
 }
 
+/* Show mega menu on hover */
 .nav-link-dropdown:hover .mega-menu {
-    opacity: 1;
-    visibility: visible;
+    display: block;
 }
 
+/* Grid layout for columns */
 .mega-menu-inner {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 24px;
+    gap: 20px;
 }
 
+/* Each category column */
 .mega-menu-column {
-    min-width: 120px;
+    min-width: 100px;
 }
 
+/* Category group title */
 .mega-menu-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--slate-900);
-    margin-bottom: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 10px;
     cursor: pointer;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--primary);
+    padding-bottom: 6px;
+    border-bottom: 2px solid #0D9488;
 }
 
 .mega-menu-title:hover {
-    color: var(--primary);
+    color: #0D9488;
 }
 
+/* Category list */
 .mega-menu-list {
     list-style: none;
     padding: 0;
@@ -58,92 +64,219 @@
 
 .mega-menu-list li {
     font-size: 13px;
-    color: var(--slate-600);
-    padding: 6px 0;
+    color: #4B5563;
+    padding: 4px 0;
     cursor: pointer;
     transition: color 0.15s;
 }
 
 .mega-menu-list li:hover {
-    color: var(--primary);
+    color: #0D9488;
 }
 
 .mega-menu-list li.see-all {
-    color: var(--primary);
-    font-weight: 600;
-    margin-top: 8px;
+    color: #0D9488;
+    font-weight: 500;
+    margin-top: 6px;
 }
 
-/* Category cards grid fix */
+/* ============================================ */
+/* Category cards grid (for /categories page) */
+/* ============================================ */
+
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
 }
 
 .category-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--slate-200);
-    padding: 20px;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    padding: 16px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .category-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+    border-color: #0D9488;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .category-icon {
-    font-size: 32px;
-    margin-bottom: 12px;
+    font-size: 28px;
+    margin-bottom: 8px;
 }
 
 .category-card h4 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    color: #111827;
 }
 
-/* Category group cards on home */
+/* ============================================ */
+/* Category group cards on home page */
+/* ============================================ */
+
 .category-groups-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
 .category-group-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--slate-200);
-    padding: 24px;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    padding: 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
 }
 
 .category-group-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+    border-color: #0D9488;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .category-group-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
+    font-size: 32px;
+    margin-bottom: 8px;
 }
 
 .category-group-card h4 {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
 }
+
+/* ============================================ */
+/* Listing detail page additions */
+/* ============================================ */
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-label {
+    color: #6B7280;
+    font-size: 13px;
+}
+
+.detail-value {
+    font-weight: 500;
+    color: #111827;
+    font-size: 13px;
+}
+
+.check-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+
+.check-item.passed .check-status {
+    color: #059669;
+    font-weight: 500;
+}
+
+.check-item.failed .check-status {
+    color: #DC2626;
+    font-weight: 500;
+}
+
+.listing-detail-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.gallery-thumbs {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.gallery-thumb {
+    width: 72px;
+    height: 54px;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.gallery-thumb:hover,
+.gallery-thumb.active {
+    opacity: 1;
+    border-color: #0D9488;
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+/* Admin Panel */
+.admin-panel {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.admin-panel h3 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 12px;
+}
+
+.admin-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.admin-actions .btn {
+    font-size: 13px;
+    padding: 8px 12px;
+}
+
+/* ============================================ */
+/* Responsive */
+/* ============================================ */
 
 @media (max-width: 1024px) {
     .mega-menu {
-        display: none;
+        display: none !important;
     }
     .category-groups-grid {
         grid-template-columns: repeat(3, 1fr);

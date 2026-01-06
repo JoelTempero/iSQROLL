@@ -2,29 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iSQROLL - A Marketplace for the People</title>
-    <meta name="description" content="New Zealand's community marketplace. Buy and sell with Kiwis you trust. Safe, simple, and free to list.">
-    <meta name="keywords" content="marketplace, buy, sell, New Zealand, NZ, trade, second hand, used">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>iSQROLL - New Zealand Marketplace</title>
+    <meta name="description" content="New Zealand's trusted marketplace. Buy and sell vehicles, property, farming equipment and more.">
+    <meta name="keywords" content="marketplace, buy, sell, New Zealand, NZ, trade, vehicles, property, farming">
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0D9488">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="iSQROLL">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="iSQROLL">
+    <meta name="msapplication-TileColor" content="#0D9488">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="format-detection" content="telephone=no">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon.svg">
+    <link rel="apple-touch-icon" sizes="167x167" href="icons/icon.svg">
+
+    <!-- Splash Screens for iOS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Styles -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/mega-menu-styles.css">
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D9488'/%3E%3Cpath d='M16 6L6 14v12h8v-6h4v6h8V14L16 6z' fill='white'/%3E%3C/svg%3E">
 </head>
 <body>
-    <!-- App shell rendered by JavaScript -->
-    <div id="loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-display);">
+    <!-- App shell -->
+    <div id="loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:'Inter',sans-serif;">
         <div style="text-align:center;">
-            <div style="font-size:48px;margin-bottom:16px;">🏠</div>
-            <div style="color:var(--slate-500);">Loading iSQROLL...</div>
+            <div style="width:48px;height:48px;margin:0 auto 16px;background:#0D9488;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+            </div>
+            <div style="color:#6B7280;font-size:14px;">Loading...</div>
         </div>
     </div>
 
@@ -32,11 +58,26 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
+
     <!-- App Scripts -->
     <script src="js/firebase-config.js"></script>
     <script src="js/data.js"></script>
     <script src="js/pages.js"></script>
     <script src="js/app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
