@@ -282,6 +282,117 @@ const Pages = {
         </section>`;
     },
 
+    faq() {
+        return `
+        <div class="page-header">
+            <div class="container">
+                <h1>Frequently Asked Questions</h1>
+                <p class="lead">Everything you need to know about iSQROLL</p>
+            </div>
+        </div>
+        
+        <section class="section" style="background:var(--white);">
+            <div class="container" style="max-width:800px;">
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">Is iSQROLL free to use?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Yes! Our basic membership is completely free. You can browse listings, contact sellers, 
+                            save items to your watchlist, and create up to 5 listings per month at no cost. 
+                            We also offer affordable paid plans for sellers who want unlimited listings and extra features.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">Are there any lock-in contracts?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            No lock-in contracts at all. You can upgrade, downgrade, or cancel your membership at any time. 
+                            We believe in earning your business, not trapping you in it.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">How does verification work?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Getting verified is free and helps build trust in the community. Verified users have 
+                            confirmed their identity, which gives buyers and sellers confidence when trading. 
+                            You can request verification through your profile settings.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">I'm a car dealership. Can I list my vehicles?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Absolutely! We welcome dealerships and businesses. Our Business membership gives you 
+                            unlimited listings, a branded profile page, and priority placement. Contact us to 
+                            discuss how we can help showcase your inventory.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">How do I contact a seller?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Simply click the "Contact" or "Message" button on any listing. You'll need to be logged 
+                            in to send messages. Once you send a message, the seller will be notified and can respond 
+                            directly to you.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">Is iSQROLL safe?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            We take safety seriously. Our free verification system helps eliminate scammers and fake 
+                            accounts. We also provide feedback ratings so you can see a seller's track record. 
+                            For vehicles, we display background checks including stolen and damaged import status.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">What can I sell on iSQROLL?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Almost anything legal! We have categories for vehicles, property, farming equipment, 
+                            electronics, clothing, home goods, and much more. Check our categories page for the 
+                            full list. Some items are restricted – please review our Terms of Use.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom:16px;">
+                    <div class="card-body" style="padding:24px;">
+                        <h3 style="margin-bottom:12px;">How do payments work?</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">
+                            Payments are arranged directly between buyers and sellers. Most transactions use 
+                            bank transfer or cash on pickup. We recommend using secure payment methods and 
+                            meeting in safe, public locations for pickups.
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+        </section>
+        
+        <section class="section">
+            <div class="container" style="text-align:center;">
+                <h2 style="margin-bottom:16px;">Still have questions?</h2>
+                <p class="text-muted" style="margin-bottom:32px;">We're here to help</p>
+                <button class="btn btn-primary btn-lg" onclick="App.navigate('contact')">Contact Us</button>
+            </div>
+        </section>`;
+    },
+
     contact() {
         return `
         <div class="page-header">
@@ -307,8 +418,13 @@ const Pages = {
                         </div>
                         
                         <div style="margin-bottom:24px;">
-                            <h4 style="font-size:16px;margin-bottom:8px;">📍 Location</h4>
-                            <p style="color:var(--slate-600);">Whanganui, New Zealand</p>
+                            <h4 style="font-size:16px;margin-bottom:8px;">📞 Phone</h4>
+                            <p style="color:var(--slate-600);">Ray: 027 463 7463</p>
+                        </div>
+                        
+                        <div style="margin-bottom:24px;">
+                            <h4 style="font-size:16px;margin-bottom:8px;">📍 Address</h4>
+                            <p style="color:var(--slate-600);">56 Victoria Avenue<br>Whanganui 4500<br>New Zealand</p>
                         </div>
                         
                         <div>
@@ -356,7 +472,7 @@ const Pages = {
         <div class="page-header">
             <div class="container">
                 <h1>Privacy Policy</h1>
-                <p class="lead">Last updated: January 2026</p>
+                <p class="lead">iSQROLL Limited (NZCN 8829013)</p>
             </div>
         </div>
         
@@ -364,6 +480,10 @@ const Pages = {
             <div class="container" style="max-width:800px;">
                 <div class="card">
                     <div class="card-body" style="padding:40px;">
+                        <p style="color:var(--slate-600);margin-bottom:32px;">
+                            This Privacy Policy explains how iSQROLL Limited collects, uses, and protects your 
+                            personal information in accordance with the Privacy Act 2020 (New Zealand).
+                        </p>
                         <div style="color:var(--slate-600);line-height:1.9;">
                             <h3 style="color:var(--slate-900);margin-bottom:16px;">1. Information We Collect</h3>
                             <p style="margin-bottom:24px;">
@@ -420,8 +540,8 @@ const Pages = {
         return `
         <div class="page-header">
             <div class="container">
-                <h1>Terms of Use</h1>
-                <p class="lead">Last updated: January 2026</p>
+                <h1>Terms and Conditions</h1>
+                <p class="lead">iSQROLL Limited (NZCN 8829013)</p>
             </div>
         </div>
         
@@ -429,6 +549,10 @@ const Pages = {
             <div class="container" style="max-width:800px;">
                 <div class="card">
                     <div class="card-body" style="padding:40px;">
+                        <p style="color:var(--slate-600);margin-bottom:32px;">
+                            These Terms and Conditions govern your use of the iSQROLL website and services operated 
+                            by iSQROLL Limited. By using our platform, you agree to these terms.
+                        </p>
                         <div style="color:var(--slate-600);line-height:1.9;">
                             <h3 style="color:var(--slate-900);margin-bottom:16px;">1. Acceptance of Terms</h3>
                             <p style="margin-bottom:24px;">
