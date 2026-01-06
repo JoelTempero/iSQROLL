@@ -179,7 +179,7 @@ const Components = {
                 </div>
                 <div class="footer-bottom">
                     <p>© 2024 iSQROLL Limited. All rights reserved. NZBN 9429051480974</p>
-                    <p style="margin-top:8px;font-size:12px;">Powered by <a href="https://sidequestdigital.co.nz" target="_blank" style="color:var(--primary);">Sidequest Digital</a></p>
+                    <p style="margin-top:8px;font-size:12px;">Powered by <a href="https://tempero.nz" target="_blank" style="color:var(--primary);">Sidequest Digital</a></p>
                 </div>
             </div>
         </footer>`;
@@ -1085,14 +1085,195 @@ const App = {
         const f = this.filters;
         const isVehicleSearch = this.searchGroup === 'automotive' || (this.searchCategory && this.categories.find(c => c.id === this.searchCategory)?.group === 'automotive');
         const isPropertySearch = this.searchGroup === 'property' || (this.searchCategory && this.categories.find(c => c.id === this.searchCategory)?.group === 'property');
+        
+        // Build active filter chips
+        const activeFilters = [];
+        if (this.searchQuery) activeFilters.push({ label: `"${this.searchQuery}"`, clear: "App.searchQuery='';App.render();" });
+        if (this.searchCategory) activeFilters.push({ label: catName, clear: "App.searchCategory='';App.render();" });
+        if (this.searchGroup && !this.searchCategory) activeFilters.push({ label: groupName, clear: "App.searchGroup='';App.render();" });
+        if (f.location) activeFilters.push({ label: f.location, clear: "App.filters.location='';App.render();" });
+        if (f.priceMin || f.priceMax) activeFilters.push({ label: `$${f.priceMin || '0'} - $${f.priceMax || '∞'}`, clear: "App.filters.priceMin='';App.filters.priceMax='';App.render();" });
+        if (f.condition) activeFilters.push({ label: f.condition, clear: "App.filters.condition='';App.render();" });
+        if (f.saleType) activeFilters.push({ label: f.saleType === 'buynow' ? 'Buy Now' : 'Auction', clear: "App.filters.saleType='';App.render();" });
 
         return `
-        ${this.renderSearch()}
+        <!-- Mobile Search Header -->
+        <div class="mobile-search-header">
+            <div class="container">
+                <div class="mobile-search-bar">
+                    <div class="mobile-search-input-wrapper">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" class="mobile-search-input" id="mobileSearchInput" placeholder="Search listings..." value="${this.searchQuery}" onkeyup="if(event.key==='Enter'){App.searchQuery=this.value;App.render();}">
+                    </div>
+                    <button class="btn btn-primary mobile-filter-btn" onclick="toggleMobileFilters()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="8" cy="6" r="2" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/></svg>
+                        Filters
+                        ${this.hasActiveFilters() ? `<span class="filter-badge">${activeFilters.length}</span>` : ''}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Filter Drawer -->
+        <div class="mobile-filter-drawer" id="mobileFilterDrawer">
+            <div class="mobile-filter-drawer-header">
+                <h3>Filters</h3>
+                <button class="btn btn-ghost" onclick="toggleMobileFilters()">✕</button>
+            </div>
+            <div class="mobile-filter-drawer-body">
+                <!-- Category Selection -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Category</label>
+                    <select class="form-input form-select" onchange="App.searchCategory=this.value;App.searchGroup='';App.render();">
+                        <option value="">All Categories</option>
+                        ${this.categoryGroups.map(g => `
+                            <optgroup label="${g.name}">
+                                ${this.categories.filter(c => c.group === g.id).map(c => 
+                                    `<option value="${c.id}" ${this.searchCategory === c.id ? 'selected' : ''}>${c.name}</option>`
+                                ).join('')}
+                            </optgroup>
+                        `).join('')}
+                    </select>
+                </div>
+
+                <!-- Location -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Location</label>
+                    <select class="form-input form-select" onchange="App.filters.location=this.value;App.render();">
+                        <option value="">All New Zealand</option>
+                        ${NZ_REGIONS.map(r => `<option value="${r}" ${f.location === r ? 'selected' : ''}>${r}</option>`).join('')}
+                    </select>
+                </div>
+
+                <!-- Sort -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Sort by</label>
+                    <select class="form-input form-select" onchange="App.filters.sortBy=this.value;App.render();">
+                        <option value="newest" ${f.sortBy === 'newest' ? 'selected' : ''}>Newest first</option>
+                        <option value="oldest" ${f.sortBy === 'oldest' ? 'selected' : ''}>Oldest first</option>
+                        <option value="price-low" ${f.sortBy === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
+                        <option value="price-high" ${f.sortBy === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
+                    </select>
+                </div>
+
+                <!-- Price Range -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Price Range</label>
+                    <div class="mobile-price-inputs">
+                        <input type="number" class="form-input" placeholder="Min $" id="mobilePriceMin" value="${f.priceMin}">
+                        <span>to</span>
+                        <input type="number" class="form-input" placeholder="Max $" id="mobilePriceMax" value="${f.priceMax}">
+                    </div>
+                </div>
+
+                <!-- Condition -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Condition</label>
+                    <div class="mobile-filter-chips">
+                        <button class="filter-chip ${f.condition === '' ? 'active' : ''}" onclick="App.filters.condition='';App.render();">Any</button>
+                        <button class="filter-chip ${f.condition === 'new' ? 'active' : ''}" onclick="App.filters.condition='new';App.render();">New</button>
+                        <button class="filter-chip ${f.condition === 'used' ? 'active' : ''}" onclick="App.filters.condition='used';App.render();">Used</button>
+                    </div>
+                </div>
+
+                <!-- Sale Type -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Sale Type</label>
+                    <div class="mobile-filter-chips">
+                        <button class="filter-chip ${f.saleType === '' ? 'active' : ''}" onclick="App.filters.saleType='';App.render();">All</button>
+                        <button class="filter-chip ${f.saleType === 'buynow' ? 'active' : ''}" onclick="App.filters.saleType='buynow';App.render();">Buy Now</button>
+                        <button class="filter-chip ${f.saleType === 'auction' ? 'active' : ''}" onclick="App.filters.saleType='auction';App.render();">Auction</button>
+                    </div>
+                </div>
+
+                ${isVehicleSearch ? `
+                <!-- Vehicle Specific -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Vehicle Details</label>
+                    <input type="text" class="form-input" placeholder="Make (e.g. Toyota)" value="${f.make}" onchange="App.filters.make=this.value;" style="margin-bottom:8px;">
+                    <input type="text" class="form-input" placeholder="Model (e.g. Corolla)" value="${f.model}" onchange="App.filters.model=this.value;" style="margin-bottom:8px;">
+                    <div class="mobile-price-inputs">
+                        <input type="number" class="form-input" placeholder="Year from" value="${f.yearMin}" onchange="App.filters.yearMin=this.value;">
+                        <span>to</span>
+                        <input type="number" class="form-input" placeholder="Year to" value="${f.yearMax}" onchange="App.filters.yearMax=this.value;">
+                    </div>
+                </div>
+                ` : ''}
+
+                ${isPropertySearch ? `
+                <!-- Property Specific -->
+                <div class="mobile-filter-section">
+                    <label class="mobile-filter-label">Property Details</label>
+                    <div class="mobile-price-inputs" style="margin-bottom:8px;">
+                        <select class="form-input form-select" onchange="App.filters.bedrooms=this.value;">
+                            <option value="">Bedrooms</option>
+                            <option value="1" ${f.bedrooms === '1' ? 'selected' : ''}>1+</option>
+                            <option value="2" ${f.bedrooms === '2' ? 'selected' : ''}>2+</option>
+                            <option value="3" ${f.bedrooms === '3' ? 'selected' : ''}>3+</option>
+                            <option value="4" ${f.bedrooms === '4' ? 'selected' : ''}>4+</option>
+                        </select>
+                        <select class="form-input form-select" onchange="App.filters.bathrooms=this.value;">
+                            <option value="">Bathrooms</option>
+                            <option value="1" ${f.bathrooms === '1' ? 'selected' : ''}>1+</option>
+                            <option value="2" ${f.bathrooms === '2' ? 'selected' : ''}>2+</option>
+                            <option value="3" ${f.bathrooms === '3' ? 'selected' : ''}>3+</option>
+                        </select>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            <div class="mobile-filter-drawer-footer">
+                <button class="btn btn-ghost" onclick="App.clearFilters();toggleMobileFilters();">Clear All</button>
+                <button class="btn btn-primary" onclick="applyMobileFilters();">Show ${listings.length} Results</button>
+            </div>
+        </div>
+        <div class="mobile-filter-overlay" id="mobileFilterOverlay" onclick="toggleMobileFilters()"></div>
+
+        <!-- Desktop Search Bar -->
+        <section class="search-section desktop-only">
+            <div class="container">
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search listings..." value="${this.searchQuery}">
+                    </div>
+                    <select class="category-select form-select" id="searchCat">
+                        <option value="">All Categories</option>
+                        ${this.categoryGroups.map(g => `
+                            <optgroup label="${g.name}">
+                                ${this.categories.filter(c => c.group === g.id).map(c => 
+                                    `<option value="${c.id}" ${this.searchCategory === c.id ? 'selected' : ''}>${c.name}</option>`
+                                ).join('')}
+                            </optgroup>
+                        `).join('')}
+                    </select>
+                    <button class="btn btn-primary" onclick="doSearch()">Search</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Filters Chips -->
+        ${activeFilters.length ? `
+        <div class="active-filters-bar">
+            <div class="container">
+                <div class="active-filters">
+                    ${activeFilters.map(af => `
+                        <span class="active-filter-chip">
+                            ${af.label}
+                            <button onclick="${af.clear}">✕</button>
+                        </span>
+                    `).join('')}
+                    <button class="btn btn-ghost btn-sm" onclick="App.clearFilters()">Clear all</button>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
         <section class="section" style="padding-top:20px;"><div class="container">
-            <div class="browse-layout" style="display:grid;grid-template-columns:280px 1fr;gap:24px;">
-                <!-- Filter Sidebar -->
-                <div class="filter-sidebar">
-                    <div class="card" style="position:sticky;top:80px;">
+            <div class="browse-layout">
+                <!-- Filter Sidebar (Desktop) -->
+                <div class="filter-sidebar desktop-only">
+                    <div class="card" style="position:sticky;top:20px;">
                         <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
                             <h3 class="card-title" style="margin:0;">Filters</h3>
                             ${this.hasActiveFilters() ? `<button class="btn btn-ghost btn-sm" onclick="App.clearFilters()">Clear all</button>` : ''}
@@ -1204,7 +1385,7 @@ const App = {
                 </div>
 
                 <!-- Listings Grid -->
-                <div>
+                <div class="listings-area">
                     <div class="section-header" style="margin-bottom:20px;">
                         <h2 style="font-size:1.25rem;">${title} <span class="text-muted" style="font-weight:400;">(${listings.length} results)</span></h2>
                     </div>
@@ -1214,14 +1395,7 @@ const App = {
                     }
                 </div>
             </div>
-        </div></section>
-
-        <style>
-            @media (max-width: 900px) {
-                .browse-layout { grid-template-columns: 1fr !important; }
-                .filter-sidebar { display: none; }
-            }
-        </style>`;
+        </div></section>`;
     },
 
     renderCategories() {
@@ -3169,6 +3343,28 @@ function toggleDropdown() {
 
 function toggleMobileMenu() {
     document.getElementById('mobileNav')?.classList.toggle('active');
+}
+
+function toggleMobileFilters() {
+    const drawer = document.getElementById('mobileFilterDrawer');
+    const overlay = document.getElementById('mobileFilterOverlay');
+    if (drawer && overlay) {
+        drawer.classList.toggle('active');
+        overlay.classList.toggle('active');
+        document.body.style.overflow = drawer.classList.contains('active') ? 'hidden' : '';
+    }
+}
+
+function applyMobileFilters() {
+    // Get values from mobile filter inputs
+    const priceMin = document.getElementById('mobilePriceMin')?.value;
+    const priceMax = document.getElementById('mobilePriceMax')?.value;
+    
+    if (priceMin) App.filters.priceMin = priceMin;
+    if (priceMax) App.filters.priceMax = priceMax;
+    
+    toggleMobileFilters();
+    App.render();
 }
 
 function toggleSubscriptionTier() {
