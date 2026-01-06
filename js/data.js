@@ -11,6 +11,7 @@ const CATEGORY_GROUPS = [
     { id: 'services', name: 'Services & Advertisements', icon: '📢' },
     { id: 'occupations', name: 'Occupations', icon: '💼' }
 ];
+window.CATEGORY_GROUPS = CATEGORY_GROUPS;
 
 // Full category list with parent groups
 const CATEGORIES = [
@@ -77,6 +78,7 @@ const CATEGORIES = [
     { id: 'job-property', name: 'Property', icon: '🏘️', group: 'occupations', order: 50, listingType: 'job' },
     { id: 'job-other', name: 'Other', icon: '💼', group: 'occupations', order: 51, listingType: 'job' }
 ];
+window.CATEGORIES = CATEGORIES;
 
 const NZ_REGIONS = [
     'Northland', 'Auckland', 'Waikato', 'Bay of Plenty', 'Gisborne',
@@ -84,12 +86,14 @@ const NZ_REGIONS = [
     'Tasman', 'Nelson', 'Marlborough', 'West Coast', 'Canterbury',
     'Otago', 'Southland'
 ];
+window.NZ_REGIONS = NZ_REGIONS;
 
 // Demo credentials
 const DEMO_CREDENTIALS = {
     email: 'demo@isqroll.co.nz',
     password: 'demo123'
 };
+window.DEMO_CREDENTIALS = DEMO_CREDENTIALS;
 
 // ============================================
 // SAMPLE LISTINGS - Vehicle Type
@@ -699,12 +703,8 @@ function getCategory(categoryId) {
     return CATEGORIES.find(c => c.id === categoryId);
 }
 
-// Export to window
+// Export remaining functions to window
 window.seedDatabase = seedDatabase;
-window.CATEGORIES = CATEGORIES;
-window.CATEGORY_GROUPS = CATEGORY_GROUPS;
-window.NZ_REGIONS = NZ_REGIONS;
-window.DEMO_CREDENTIALS = DEMO_CREDENTIALS;
 window.getCategoriesByGroup = getCategoriesByGroup;
 window.getCategoryGroup = getCategoryGroup;
 window.getCategory = getCategory;
