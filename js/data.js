@@ -714,7 +714,7 @@ const PARTY_EVENTS_LISTINGS = [
         location: 'Wellington',
         suburb: 'Newtown',
         description: 'Pioneer DDJ-400 controller, pair of Alto speakers, and microphone. Everything you need to DJ parties. Great condition.',
-        images: ['https://images.unsplash.com/photo-1571266028243-d220c6a3ee0e?w=800'],
+        images: ['https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800'],
         condition: 'Good',
         brand: 'Pioneer',
         views: 345,

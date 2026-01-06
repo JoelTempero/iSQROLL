@@ -19,7 +19,7 @@ const Components = {
         <header class="header">
             <div class="container header-inner">
                 <div class="logo" onclick="App.navigate('home')">
-                    <img src="images/logo.png" alt="iSQROLL" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <img src="images/Isqroll-default-logo.png" alt="iSQROLL" class="logo-img" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
                     <div class="logo-fallback" style="display:none;">
                         <div class="logo-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
@@ -366,6 +366,7 @@ const ADMIN_EMAILS = ['admin@isqroll.co.nz', 'joel@temperocreative.co.nz', 'demo
 
 const App = {
     currentUser: null,
+    userProfile: null,
     listings: [],
     categories: [],
     categoryGroups: [],
@@ -455,6 +456,12 @@ const App = {
     async loadUserData() {
         if (!this.currentUser) return;
         try {
+            // Load user profile including location
+            const userDoc = await db.collection('users').doc(this.currentUser.uid).get();
+            if (userDoc.exists) {
+                this.userProfile = userDoc.data();
+            }
+            
             // Load saved items
             const savedSnap = await db.collection('users').doc(this.currentUser.uid)
                 .collection('saved').get();
@@ -933,6 +940,10 @@ const App = {
         const vehicles = this.listings.filter(l => l.listingType === 'vehicle').slice(0, 4);
         const property = this.listings.filter(l => l.listingType === 'property').slice(0, 4);
         const recent = this.listings.slice(0, 8);
+        
+        // Get listings near user if they have a location set
+        const userLocation = this.userProfile?.location;
+        const nearMe = userLocation ? this.listings.filter(l => l.location === userLocation).slice(0, 4) : [];
 
         // Welcome header for logged in users
         const welcomeHeader = this.currentUser ? `
@@ -1006,12 +1017,12 @@ const App = {
             </div>
         </section>
 
-        <!-- Listings Near You -->
-        ${recent.length ? `
+        <!-- Listings Near You - Only show if user has location set -->
+        ${nearMe.length ? `
         <section class="section">
             <div class="container">
-                <div class="section-header"><h2>Listings Near to Me</h2><button class="btn btn-ghost" onclick="App.navigate('browse')">View all →</button></div>
-                <div class="listings-grid">${recent.slice(0, 4).map(l => this.renderMobileCard(l)).join('')}</div>
+                <div class="section-header"><h2>Listings Near Me (${userLocation})</h2><button class="btn btn-ghost" onclick="App.filters.location='${userLocation}';App.navigate('browse')">View all →</button></div>
+                <div class="listings-grid">${nearMe.map(l => this.renderMobileCard(l)).join('')}</div>
             </div>
         </section>` : ''}
 
@@ -1022,7 +1033,6 @@ const App = {
                 <div class="category-groups-grid">
                     ${this.categoryGroups.map(g => `
                         <div class="category-group-card" onclick="App.searchGroup='${g.id}';App.searchCategory='';App.navigate('browse');">
-                            <div class="category-group-icon">${g.icon}</div>
                             <h4>${g.name}</h4>
                             <p class="text-muted text-sm">${this.categories.filter(c => c.group === g.id).length} categories</p>
                         </div>
@@ -1215,9 +1225,6 @@ const App = {
     },
 
     renderCategories() {
-        // Debug: log what we have
-        console.log('Categories:', this.categories.length, 'Groups:', this.categoryGroups.length);
-        
         // If categories haven't loaded yet, use local data
         const cats = this.categories.length > 0 ? this.categories : CATEGORIES;
         const groups = this.categoryGroups.length > 0 ? this.categoryGroups : CATEGORY_GROUPS;
@@ -1228,13 +1235,12 @@ const App = {
             ${groups.map(g => {
                 const groupCats = cats.filter(c => c.group === g.id);
                 return `
-                <div style="margin-bottom:48px;">
-                    <h2 style="margin-bottom:24px;">${g.icon} ${g.name}</h2>
+                <div class="category-section">
+                    <h2 class="category-section-title">${g.name}</h2>
                     <div class="categories-grid">
                         ${groupCats.map(c => {
                             const count = this.listings.filter(l => l.category === c.id).length;
                             return `<div class="category-card" onclick="App.searchCategory='${c.id}';App.searchGroup='';App.navigate('browse');">
-                                <div class="category-icon">${c.icon}</div>
                                 <h4>${c.name}</h4>
                                 <p class="text-muted text-sm">${count} listings</p>
                             </div>`;
