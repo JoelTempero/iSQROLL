@@ -1,0 +1,157 @@
+/* Mega Menu Styles - Add to main.css */
+
+.nav-link-dropdown {
+    position: relative;
+}
+
+.mega-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    border: 1px solid var(--slate-200);
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    min-width: 800px;
+}
+
+.nav-link-dropdown:hover .mega-menu {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mega-menu-inner {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 24px;
+}
+
+.mega-menu-column {
+    min-width: 120px;
+}
+
+.mega-menu-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 12px;
+    cursor: pointer;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+}
+
+.mega-menu-title:hover {
+    color: var(--primary);
+}
+
+.mega-menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-menu-list li {
+    font-size: 13px;
+    color: var(--slate-600);
+    padding: 6px 0;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.mega-menu-list li:hover {
+    color: var(--primary);
+}
+
+.mega-menu-list li.see-all {
+    color: var(--primary);
+    font-weight: 600;
+    margin-top: 8px;
+}
+
+/* Category cards grid fix */
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+}
+
+.category-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--slate-200);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.category-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.category-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Category group cards on home */
+.category-groups-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+}
+
+.category-group-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--slate-200);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.category-group-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+}
+
+.category-group-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.category-group-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+    .mega-menu {
+        display: none;
+    }
+    .category-groups-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .category-groups-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

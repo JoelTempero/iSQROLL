@@ -11,6 +11,10 @@ const Components = {
         const user = App.currentUser;
         const initial = user ? (user.displayName || user.email)[0].toUpperCase() : '';
         
+        // Use local data if App data not loaded yet
+        const groups = App.categoryGroups?.length > 0 ? App.categoryGroups : CATEGORY_GROUPS;
+        const cats = App.categories?.length > 0 ? App.categories : CATEGORIES;
+        
         return `
         <header class="header">
             <div class="container header-inner">
@@ -26,7 +30,26 @@ const Components = {
                 </div>
                 <nav class="nav-main">
                     <span class="nav-link" onclick="App.navigate('browse')">Browse</span>
-                    <span class="nav-link" onclick="App.navigate('categories')">Categories</span>
+                    <div class="nav-link-dropdown">
+                        <span class="nav-link">Categories ▾</span>
+                        <div class="mega-menu">
+                            <div class="mega-menu-inner">
+                                ${groups.map(g => {
+                                    const groupCats = cats.filter(c => c.group === g.id);
+                                    return `
+                                    <div class="mega-menu-column">
+                                        <h4 class="mega-menu-title" onclick="App.searchGroup='${g.id}';App.searchCategory='';App.navigate('browse');">${g.name}</h4>
+                                        <ul class="mega-menu-list">
+                                            ${groupCats.slice(0, 8).map(c => `
+                                                <li onclick="App.searchCategory='${c.id}';App.searchGroup='';App.navigate('browse');">${c.name}</li>
+                                            `).join('')}
+                                            ${groupCats.length > 8 ? `<li class="see-all" onclick="App.searchGroup='${g.id}';App.navigate('browse');">See All →</li>` : ''}
+                                        </ul>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
                     <span class="nav-link" onclick="App.navigate('how-it-works')">How it Works</span>
                     <span class="nav-link" onclick="App.navigate('about')">About</span>
                 </nav>
