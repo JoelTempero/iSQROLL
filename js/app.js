@@ -63,11 +63,12 @@ const Components = {
                                     <div class="dropdown-name">${user.displayName || 'User'}</div>
                                     <div class="dropdown-email">${user.email}</div>
                                 </div>
-                                <div class="dropdown-item" onclick="App.navigate('profile')">👤 Profile</div>
-                                <div class="dropdown-item" onclick="App.navigate('my-listings')">📦 My Listings</div>
-                                <div class="dropdown-item" onclick="App.navigate('saved')">❤️ Saved</div>
-                                <div class="dropdown-item" onclick="App.navigate('messages')">💬 Messages</div>
-                                <div class="dropdown-item danger" onclick="App.logout()">🚪 Log Out</div>
+                                <div class="dropdown-item" onclick="App.navigate('profile')">Profile</div>
+                                <div class="dropdown-item" onclick="App.navigate('my-listings')">My Listings</div>
+                                <div class="dropdown-item" onclick="App.navigate('saved')">Saved</div>
+                                <div class="dropdown-item" onclick="App.navigate('messages')">Messages</div>
+                                ${App.isAdmin() ? '<div class="dropdown-item" onclick="App.navigate(\'admin\')">Admin Panel</div>' : ''}
+                                <div class="dropdown-item danger" onclick="App.logout()">Log Out</div>
                             </div>
                         </div>
                     ` : `
@@ -260,6 +261,9 @@ const Components = {
 // MAIN APP OBJECT
 // ============================================
 
+// Admin email addresses
+const ADMIN_EMAILS = ['admin@isqroll.co.nz', 'joel@temperocreative.co.nz', 'demo@isqroll.co.nz'];
+
 const App = {
     currentUser: null,
     listings: [],
@@ -272,6 +276,11 @@ const App = {
     searchQuery: '',
     searchCategory: '',
     searchGroup: '',
+
+    // Check if current user is admin
+    isAdmin() {
+        return this.currentUser && ADMIN_EMAILS.includes(this.currentUser.email);
+    },
 
     async init() {
         console.log('🚀 Initializing iSQROLL...');
@@ -371,6 +380,7 @@ const App = {
             case 'messages': return this.renderMessages();
             case 'create': return this.renderCreateListing();
             case 'pricing': return this.renderPricing();
+            case 'admin': return this.renderAdmin();
             // Static pages from Pages object
             case 'about': return Pages.about();
             case 'how-it-works': return Pages.howItWorks();
@@ -1199,6 +1209,148 @@ const App = {
                 <p class="text-muted">No lock-in contracts. Cancel anytime. All prices in NZD.</p>
             </div>
         </div></section>`;
+    },
+
+    renderAdmin() {
+        if (!this.isAdmin()) {
+            return `<div class="page-header"><div class="container"><h1>Access Denied</h1><p>You don't have permission to view this page.</p></div></div>`;
+        }
+
+        return `
+        <div class="page-header">
+            <div class="container">
+                <h1>Admin Panel</h1>
+                <p class="lead">Manage listings and data</p>
+            </div>
+        </div>
+        <div class="container" style="padding:32px 24px 80px;">
+            <div class="admin-panel">
+                <h3>Data Management</h3>
+                <div class="admin-actions">
+                    <button class="btn btn-secondary" onclick="App.adminClearListings()">Clear All Listings</button>
+                    <button class="btn btn-primary" onclick="App.adminSeedData()">Seed Demo Data</button>
+                    <button class="btn btn-secondary" onclick="App.adminExportData()">Export Data (JSON)</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom:20px;">
+                <div class="card-header"><h3 class="card-title">Statistics</h3></div>
+                <div class="card-body">
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center;">
+                        <div>
+                            <div style="font-size:32px;font-weight:700;color:var(--primary);">${this.listings.length}</div>
+                            <div class="text-muted">Listings</div>
+                        </div>
+                        <div>
+                            <div style="font-size:32px;font-weight:700;color:var(--primary);">${this.categories.length}</div>
+                            <div class="text-muted">Categories</div>
+                        </div>
+                        <div>
+                            <div style="font-size:32px;font-weight:700;color:var(--primary);">${this.categoryGroups.length}</div>
+                            <div class="text-muted">Groups</div>
+                        </div>
+                        <div>
+                            <div style="font-size:32px;font-weight:700;color:var(--primary);">${this.listings.filter(l => l.listingType === 'vehicle').length}</div>
+                            <div class="text-muted">Vehicles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><h3 class="card-title">All Listings (${this.listings.length})</h3></div>
+                <div class="card-body" style="max-height:500px;overflow-y:auto;">
+                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead>
+                            <tr style="background:var(--slate-50);text-align:left;">
+                                <th style="padding:10px;">Title</th>
+                                <th style="padding:10px;">Type</th>
+                                <th style="padding:10px;">Category</th>
+                                <th style="padding:10px;">Price</th>
+                                <th style="padding:10px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.listings.map(l => `
+                                <tr style="border-bottom:1px solid var(--slate-100);">
+                                    <td style="padding:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.title}</td>
+                                    <td style="padding:10px;">${l.listingType || 'general'}</td>
+                                    <td style="padding:10px;">${l.category}</td>
+                                    <td style="padding:10px;">${l.price ? '$' + l.price.toLocaleString() : 'POA'}</td>
+                                    <td style="padding:10px;">
+                                        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px;" onclick="App.navigate('listing','${l.id}')">View</button>
+                                        <button class="btn btn-secondary" style="padding:4px 8px;font-size:12px;color:var(--error);" onclick="App.adminDeleteListing('${l.id}')">Delete</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>`;
+    },
+
+    async adminClearListings() {
+        if (!this.isAdmin()) return;
+        if (!confirm('Are you sure you want to delete ALL listings? This cannot be undone.')) return;
+
+        showToast('Clearing listings...');
+        try {
+            const batch = db.batch();
+            const snap = await db.collection('listings').get();
+            snap.docs.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            this.listings = [];
+            this.render();
+            showToast('All listings cleared', 'success');
+        } catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        }
+    },
+
+    async adminDeleteListing(id) {
+        if (!this.isAdmin()) return;
+        if (!confirm('Delete this listing?')) return;
+
+        try {
+            await db.collection('listings').doc(id).delete();
+            this.listings = this.listings.filter(l => l.id !== id);
+            this.render();
+            showToast('Listing deleted', 'success');
+        } catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        }
+    },
+
+    async adminSeedData() {
+        if (!this.isAdmin()) return;
+        if (!confirm('This will add demo listings to the database. Continue?')) return;
+
+        showToast('Seeding data...');
+        try {
+            await seedDatabase();
+            await this.loadListings();
+            this.render();
+            showToast('Demo data seeded successfully', 'success');
+        } catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        }
+    },
+
+    adminExportData() {
+        if (!this.isAdmin()) return;
+        const data = {
+            listings: this.listings,
+            exportedAt: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'isqroll-listings-' + new Date().toISOString().split('T')[0] + '.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data exported');
     },
 
     renderCreateListing() {
