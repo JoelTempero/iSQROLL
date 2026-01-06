@@ -1,55 +1,60 @@
-/* Mega Menu Styles - Add to main.css */
+/* Mega Menu Styles for iSQROLL */
 
+/* Dropdown container */
 .nav-link-dropdown {
     position: relative;
+    display: inline-block;
 }
 
+/* The mega menu - HIDDEN by default */
 .mega-menu {
+    display: none;
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--white);
-    border-radius: var(--radius-lg);
+    left: 0;
+    background: #ffffff;
+    border-radius: 14px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    border: 1px solid var(--slate-200);
+    border: 1px solid #e2e8f0;
     padding: 24px;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-    z-index: 1000;
-    min-width: 800px;
+    z-index: 9999;
+    min-width: 850px;
+    margin-top: 8px;
 }
 
+/* Show mega menu on hover */
 .nav-link-dropdown:hover .mega-menu {
-    opacity: 1;
-    visibility: visible;
+    display: block;
 }
 
+/* Grid layout for columns */
 .mega-menu-inner {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 24px;
 }
 
+/* Each category column */
 .mega-menu-column {
     min-width: 120px;
 }
 
+/* Category group title */
 .mega-menu-title {
     font-size: 14px;
     font-weight: 700;
-    color: var(--slate-900);
+    color: #0f172a;
     margin-bottom: 12px;
     cursor: pointer;
     padding-bottom: 8px;
-    border-bottom: 2px solid var(--primary);
+    border-bottom: 2px solid #0D9488;
 }
 
 .mega-menu-title:hover {
-    color: var(--primary);
+    color: #0D9488;
 }
 
+/* Category list */
 .mega-menu-list {
     list-style: none;
     padding: 0;
@@ -58,23 +63,26 @@
 
 .mega-menu-list li {
     font-size: 13px;
-    color: var(--slate-600);
+    color: #475569;
     padding: 6px 0;
     cursor: pointer;
     transition: color 0.15s;
 }
 
 .mega-menu-list li:hover {
-    color: var(--primary);
+    color: #0D9488;
 }
 
 .mega-menu-list li.see-all {
-    color: var(--primary);
+    color: #0D9488;
     font-weight: 600;
     margin-top: 8px;
 }
 
-/* Category cards grid fix */
+/* ============================================ */
+/* Category cards grid (for /categories page) */
+/* ============================================ */
+
 .categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -82,9 +90,9 @@
 }
 
 .category-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--slate-200);
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
     padding: 20px;
     text-align: center;
     cursor: pointer;
@@ -93,8 +101,8 @@
 
 .category-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+    box-shadow: 0 10px 15px rgba(0,0,0,0.08);
+    border-color: #0D9488;
 }
 
 .category-icon {
@@ -108,7 +116,10 @@
     margin-bottom: 4px;
 }
 
-/* Category group cards on home */
+/* ============================================ */
+/* Category group cards on home page */
+/* ============================================ */
+
 .category-groups-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -116,9 +127,9 @@
 }
 
 .category-group-card {
-    background: var(--white);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--slate-200);
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
     padding: 24px;
     text-align: center;
     cursor: pointer;
@@ -127,8 +138,8 @@
 
 .category-group-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary);
+    box-shadow: 0 10px 15px rgba(0,0,0,0.08);
+    border-color: #0D9488;
 }
 
 .category-group-icon {
@@ -141,9 +152,101 @@
     font-weight: 600;
 }
 
+/* ============================================ */
+/* Listing detail page additions */
+/* ============================================ */
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-label {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.check-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.check-item.passed .check-status {
+    color: #10b981;
+}
+
+.check-item.failed .check-status {
+    color: #ef4444;
+}
+
+.listing-detail-actions {
+    display: flex;
+    gap: 8px;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.gallery-thumbs {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.gallery-thumb {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.7;
+    transition: all 0.2s;
+}
+
+.gallery-thumb:hover,
+.gallery-thumb.active {
+    opacity: 1;
+    border-color: #0D9488;
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.seller-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* ============================================ */
+/* Responsive */
+/* ============================================ */
+
 @media (max-width: 1024px) {
     .mega-menu {
-        display: none;
+        display: none !important;
     }
     .category-groups-grid {
         grid-template-columns: repeat(3, 1fr);

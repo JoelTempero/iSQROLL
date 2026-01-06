@@ -290,7 +290,7 @@ const PROPERTY_LISTINGS = [
         // Agent info
         agentName: 'Shannon Jury',
         agentCompany: 'Harcourts Whanganui',
-        agentLogo: 'https://via.placeholder.com/200x60?text=Harcourts',
+        agentLogo: null,
         agentWebsite: 'https://harcourts.net/nz/office/whanganui',
         views: 541,
         featured: true

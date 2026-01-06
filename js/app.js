@@ -297,32 +297,10 @@ const App = {
     },
 
     async loadCategories() {
-        try {
-            const snap = await db.collection('categories').get();
-            this.categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            // Sort client-side by order
-            this.categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-            
-            // Load category groups
-            const groupSnap = await db.collection('categoryGroups').get();
-            this.categoryGroups = groupSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            // Fallback to local data if empty
-            if (this.categories.length === 0) {
-                console.log('No categories in Firestore, using local');
-                this.categories = CATEGORIES;
-            }
-            if (this.categoryGroups.length === 0) {
-                console.log('No category groups in Firestore, using local');
-                this.categoryGroups = CATEGORY_GROUPS;
-            }
-            
-            console.log(`📁 Loaded ${this.categories.length} categories, ${this.categoryGroups.length} groups`);
-        } catch (e) {
-            console.log('Using local categories:', e.message);
-            this.categories = CATEGORIES;
-            this.categoryGroups = CATEGORY_GROUPS;
-        }
+        // Use local data for demo - more reliable and has full 51 categories
+        this.categories = CATEGORIES;
+        this.categoryGroups = CATEGORY_GROUPS;
+        console.log(`📁 Using local data: ${this.categories.length} categories, ${this.categoryGroups.length} groups`);
     },
 
     async loadListings() {
@@ -497,7 +475,7 @@ const App = {
         return `
         <div class="listing-card" onclick="App.navigate('listing','${l.id}')">
             <div class="listing-image">
-                <img src="${l.images?.[0] || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'}" alt="${l.title}" loading="lazy">
+                <img src="${l.images?.[0] || 'https://picsum.photos/400/300?grayscale'}" alt="${l.title}" loading="lazy">
                 ${l.featured ? '<span class="listing-badge">Featured</span>' : ''}
                 ${l.listingType === 'vehicle' ? '<span class="listing-badge" style="background:var(--slate-800);">Vehicle</span>' : ''}
                 ${l.listingType === 'property' ? '<span class="listing-badge" style="background:var(--primary);">Property</span>' : ''}
@@ -1391,7 +1369,7 @@ async function createListing(e) {
         category: document.getElementById('listingCat').value,
         description: document.getElementById('listingDesc').value,
         location: document.getElementById('listingLoc').value,
-        images: [document.getElementById('listingImage').value || 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image'],
+        images: [document.getElementById('listingImage').value || 'https://picsum.photos/800/600?grayscale'],
         listingType: type,
         sellerId: App.currentUser.uid,
         sellerName: App.currentUser.displayName || 'User',
