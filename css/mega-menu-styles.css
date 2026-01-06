@@ -3,7 +3,8 @@
 /* Dropdown container */
 .nav-link-dropdown {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
 }
 
 /* The mega menu - HIDDEN by default */

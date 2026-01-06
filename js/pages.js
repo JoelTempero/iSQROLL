@@ -12,62 +12,115 @@ const Pages = {
                 <p class="lead">A marketplace designed for Kiwis, by Kiwis</p>
             </div>
         </div>
-        
+
         <section class="section" style="background:var(--white);">
-            <div class="container" style="max-width:800px;">
+            <div class="container" style="max-width:900px;">
+                <!-- Welcome Section -->
                 <div style="text-align:center;margin-bottom:48px;">
                     <p style="font-size:1.25rem;line-height:1.8;color:var(--slate-600);">
-                        iSQROLL is a community platform that provides a safe buying and selling environment 
-                        with easy communication between traders. We believe businesses and individual buyers 
-                        and sellers are important contributors to the economic health of New Zealand.
+                        Welcome to iSQROLL, a marketplace designed for Kiwis, by Kiwis. Our mission is to create a
+                        community driven platform that provides a safe buying and selling environment with easy
+                        communication between traders.
+                    </p>
+                    <p style="font-size:1.1rem;line-height:1.8;color:var(--slate-600);margin-top:16px;">
+                        We believe businesses and individual buyers and sellers are important contributors to the
+                        economic health of New Zealand, and that buying and selling should be accessible with minimal cost.
+                    </p>
+                    <p style="font-size:1.1rem;line-height:1.8;color:var(--slate-600);margin-top:16px;">
+                        As consumers ourselves, we believe that we know what New Zealanders are asking for when it comes
+                        to an online marketplace and have committed to and pioneered an easy, inexpensive and modernized
+                        buying and selling platform for Aotearoa, New Zealand.
                     </p>
                 </div>
-                
-                <div class="card" style="margin-bottom:32px;">
+
+                <!-- Mission Statement -->
+                <div class="card" style="margin-bottom:32px;border-left:4px solid var(--primary);">
                     <div class="card-body" style="padding:40px;">
-                        <h3 style="margin-bottom:16px;">🎯 Our Mission</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            We set out to create a marketplace where buying and selling is accessible to everyone. 
-                            Whether you're a small business owner, a hobbyist looking to sell some gear, or someone 
-                            hunting for a bargain – iSQROLL is here for you.
+                        <h3 style="margin-bottom:16px;color:var(--primary);">Our Mission</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;font-size:1.1rem;">
+                            Our vision is to be New Zealand's most trusted and valued online marketplace. Our dedication
+                            to this vision means we are here for the subscribers and users of iSQROLL, and so welcome
+                            your feedback and ideas.
                         </p>
-                        <p style="color:var(--slate-600);line-height:1.8;margin-top:16px;">
-                            Unlike other platforms that charge hefty fees, we believe in keeping costs low so you 
-                            can keep more of your hard-earned money. Our affordable memberships start from $0, 
-                            giving you the freedom to buy and sell without the hassle.
+                        <p style="color:var(--slate-600);line-height:1.8;margin-top:16px;font-size:1.1rem;">
+                            By providing the right platform for Kiwis with a very low-cost membership fee, we aim to
+                            keep more money in your pocket. So you can buy and sell as much as you want.
                         </p>
                     </div>
                 </div>
-                
+
+                <!-- Founders Section -->
                 <div class="card" style="margin-bottom:32px;">
                     <div class="card-body" style="padding:40px;">
-                        <h3 style="margin-bottom:16px;">🛡️ Safety First</h3>
+                        <h3 style="margin-bottom:24px;text-align:center;">Meet the Founders</h3>
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:32px;margin-bottom:24px;">
+                            <div style="text-align:center;">
+                                <div style="width:100px;height:100px;background:var(--primary);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:white;font-size:36px;font-weight:600;">R</span>
+                                </div>
+                                <h4 style="margin-bottom:4px;">Raymond</h4>
+                                <p style="color:var(--slate-500);font-size:14px;">Co-Founder</p>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="width:100px;height:100px;background:var(--accent);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="color:white;font-size:36px;font-weight:600;">R</span>
+                                </div>
+                                <h4 style="margin-bottom:4px;">Robbie</h4>
+                                <p style="color:var(--slate-500);font-size:14px;">Co-Founder</p>
+                            </div>
+                        </div>
                         <p style="color:var(--slate-600);line-height:1.8;">
-                            We're committed to creating a safe trading environment. Our verification system 
-                            helps eliminate scammers and fake accounts – and best of all, getting verified 
-                            costs nothing. Every user can be verified at no cost, building trust throughout 
-                            our community.
+                            As regular buyers and sellers ourselves we started to notice an increase in the cost to sell
+                            goods, and that they were becoming increasingly uncertain that profiles belonged to the people
+                            they said they were. That's when we had a lightbulb moment.
+                        </p>
+                        <p style="color:var(--slate-600);line-height:1.8;margin-top:16px;">
+                            Our kiwi ingenuity kicked in, and our mission to design a platform that was membership based
+                            and safe to use was born. That means verifiable accounts and low-cost subscriptions which
+                            equates to a safe and affordable platform for everyday kiwis.
+                        </p>
+                        <p style="color:var(--slate-600);line-height:1.8;margin-top:16px;">
+                            After months of intensive research and designing the platform, we are proud to present
+                            <strong>iSQROLL - the online marketplace of New Zealand</strong>.
                         </p>
                     </div>
                 </div>
-                
-                <div class="card" style="margin-bottom:32px;">
-                    <div class="card-body" style="padding:40px;">
-                        <h3 style="margin-bottom:16px;">🇳🇿 Proudly New Zealand</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            iSQROLL is 100% Kiwi owned and operated. We understand the unique needs of 
-                            New Zealand traders because we are New Zealand traders. From Northland to 
-                            Southland, we're building a platform that connects communities across Aotearoa.
-                        </p>
-                        <p style="color:var(--slate-600);line-height:1.8;margin-top:16px;">
-                            Founded in Whanganui, we're proud to be part of the movement supporting local 
-                            businesses and sustainable commerce in New Zealand.
-                        </p>
+
+                <!-- Key Features -->
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:32px;">
+                    <div class="card" style="text-align:center;">
+                        <div class="card-body" style="padding:32px;">
+                            <div style="font-size:48px;margin-bottom:12px;">$0</div>
+                            <h4 style="margin-bottom:8px;">Free to Join</h4>
+                            <p style="color:var(--slate-500);font-size:14px;">No joining fees, ever. Get started without spending a cent.</p>
+                        </div>
+                    </div>
+                    <div class="card" style="text-align:center;">
+                        <div class="card-body" style="padding:32px;">
+                            <div style="font-size:48px;margin-bottom:12px;">0%</div>
+                            <h4 style="margin-bottom:8px;">Success Fees</h4>
+                            <p style="color:var(--slate-500);font-size:14px;">Keep 100% of your sale. No commissions taken.</p>
+                        </div>
+                    </div>
+                    <div class="card" style="text-align:center;">
+                        <div class="card-body" style="padding:32px;">
+                            <div style="font-size:48px;margin-bottom:12px;">100%</div>
+                            <h4 style="margin-bottom:8px;">Kiwi Owned</h4>
+                            <p style="color:var(--slate-500);font-size:14px;">Proudly New Zealand owned and operated.</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
-        
+
+        <!-- Tagline Banner -->
+        <section class="section" style="background:var(--slate-900);color:white;text-align:center;padding:60px 0;">
+            <div class="container">
+                <h2 style="font-size:2rem;color:white;margin-bottom:8px;">iSQROLL</h2>
+                <p style="font-size:1.25rem;color:var(--slate-400);">The online marketplace of New Zealand</p>
+            </div>
+        </section>
+
         <section class="section">
             <div class="container">
                 <div style="text-align:center;">
@@ -283,114 +336,92 @@ const Pages = {
     },
 
     faq() {
-        return `
+        const faqs = [
+            {
+                q: "What is iSQROLL?",
+                a: "iSQROLL is an online platform where buyers and sellers can connect to purchase and sell a wide range of products, from cars and houses to electronics to clothing and everything in between."
+            },
+            {
+                q: "How do I create a dealership premium membership?",
+                a: "Simply contact the team on info@isqroll.co.nz or call Ray our Automotive accounts manager on 027 463 7463 to assist you in making an account and uploading your listings."
+            },
+            {
+                q: "What is our Free membership pricing and details per month?",
+                a: "Free each month with unlimited General Item listings (including automotive parts, accessories and pets), unlimited Automotive listings, unlimited Property listings, Sales report, iChat, and iRate - all for $0.00."
+            },
+            {
+                q: "Is there any lock-in contract with iSQROLL memberships?",
+                a: "No, there are no lock-in contracts with our memberships. You can simply opt out as you please! The freedom of our customers is important to us."
+            },
+            {
+                q: "What payment methods are accepted?",
+                a: "The payment methods for subscriptions are debit or credit cards, whereas between users is bank transfer or cash depending on the seller's listing requirement."
+            },
+            {
+                q: "Is there a fee to join iSQROLL?",
+                a: "It is free to join iSQROLL."
+            },
+            {
+                q: "How do I create an account?",
+                a: "To create an account, click on the 'Sign Up' button at the top right corner of the homepage and follow the instructions. iSQROLL does not store any personal verification details."
+            },
+            {
+                q: "How do I find products?",
+                a: "You can search for products using the search bar at the top of the page or browse through categories and featured items on the homepage."
+            },
+            {
+                q: "How do I reset my password?",
+                a: "To reset your password, click on the 'Forgot Password' link on the login page and follow the instructions."
+            },
+            {
+                q: "How do I update my account information?",
+                a: "You can update your account information by logging in and going to the 'Account Settings' section."
+            },
+            {
+                q: "What should I do if I encounter a problem with a seller or buyer?",
+                a: "If you have an issue with a transaction, please contact our customer support team. We have a dispute resolution process in place to help resolve any problems."
+            },
+            {
+                q: "How do I report suspicious activity?",
+                a: "If you notice any suspicious activity, please report it to us immediately through the 'Contact Us' page or email us at info@isqroll.co.nz"
+            },
+            {
+                q: "How do I contact customer support?",
+                a: "You can reach our customer support team via the 'Contact Us' page or email us at info@isqroll.co.nz"
+            }
+        ];
+
+        return \`
         <div class="page-header">
             <div class="container">
                 <h1>Frequently Asked Questions</h1>
                 <p class="lead">Everything you need to know about iSQROLL</p>
             </div>
         </div>
-        
+
         <section class="section" style="background:var(--white);">
             <div class="container" style="max-width:800px;">
-                
+                \${faqs.map(faq => \`
                 <div class="card" style="margin-bottom:16px;">
                     <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">Is iSQROLL free to use?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Yes! Our basic membership is completely free. You can browse listings, contact sellers, 
-                            save items to your watchlist, and create up to 5 listings per month at no cost. 
-                            We also offer affordable paid plans for sellers who want unlimited listings and extra features.
-                        </p>
+                        <h3 style="margin-bottom:12px;">\${faq.q}</h3>
+                        <p style="color:var(--slate-600);line-height:1.8;">\${faq.a}</p>
                     </div>
                 </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">Are there any lock-in contracts?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            No lock-in contracts at all. You can upgrade, downgrade, or cancel your membership at any time. 
-                            We believe in earning your business, not trapping you in it.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">How does verification work?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Getting verified is free and helps build trust in the community. Verified users have 
-                            confirmed their identity, which gives buyers and sellers confidence when trading. 
-                            You can request verification through your profile settings.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">I'm a car dealership. Can I list my vehicles?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Absolutely! We welcome dealerships and businesses. Our Business membership gives you 
-                            unlimited listings, a branded profile page, and priority placement. Contact us to 
-                            discuss how we can help showcase your inventory.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">How do I contact a seller?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Simply click the "Contact" or "Message" button on any listing. You'll need to be logged 
-                            in to send messages. Once you send a message, the seller will be notified and can respond 
-                            directly to you.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">Is iSQROLL safe?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            We take safety seriously. Our free verification system helps eliminate scammers and fake 
-                            accounts. We also provide feedback ratings so you can see a seller's track record. 
-                            For vehicles, we display background checks including stolen and damaged import status.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">What can I sell on iSQROLL?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Almost anything legal! We have categories for vehicles, property, farming equipment, 
-                            electronics, clothing, home goods, and much more. Check our categories page for the 
-                            full list. Some items are restricted – please review our Terms of Use.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom:16px;">
-                    <div class="card-body" style="padding:24px;">
-                        <h3 style="margin-bottom:12px;">How do payments work?</h3>
-                        <p style="color:var(--slate-600);line-height:1.8;">
-                            Payments are arranged directly between buyers and sellers. Most transactions use 
-                            bank transfer or cash on pickup. We recommend using secure payment methods and 
-                            meeting in safe, public locations for pickups.
-                        </p>
-                    </div>
-                </div>
-                
+                \`).join('')}
             </div>
         </section>
-        
+
         <section class="section">
             <div class="container" style="text-align:center;">
                 <h2 style="margin-bottom:16px;">Still have questions?</h2>
                 <p class="text-muted" style="margin-bottom:32px;">We're here to help</p>
-                <button class="btn btn-primary btn-lg" onclick="App.navigate('contact')">Contact Us</button>
+                <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+                    <button class="btn btn-primary btn-lg" onclick="App.navigate('contact')">Contact Us</button>
+                    <a href="mailto:info@isqroll.co.nz" class="btn btn-secondary btn-lg">Email info@isqroll.co.nz</a>
+                </div>
             </div>
-        </section>`;
+        </section>\`;
     },
 
     contact() {
@@ -553,18 +584,18 @@ const Pages = {
                     <div class="card-body" style="padding:24px;">
                         <h3 style="margin-bottom:16px;">Contents</h3>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:14px;">
-                            <a href="#intro" style="color:var(--primary);text-decoration:none;">1. Introduction</a>
-                            <a href="#membership" style="color:var(--primary);text-decoration:none;">2. Membership Types</a>
-                            <a href="#accounts" style="color:var(--primary);text-decoration:none;">3. Account Registration</a>
-                            <a href="#verification" style="color:var(--primary);text-decoration:none;">4. Identity Verification</a>
-                            <a href="#listings" style="color:var(--primary);text-decoration:none;">5. Listings</a>
-                            <a href="#buying" style="color:var(--primary);text-decoration:none;">6. Buying on iSQROLL</a>
-                            <a href="#ichat" style="color:var(--primary);text-decoration:none;">7. iChat Messaging</a>
-                            <a href="#irate" style="color:var(--primary);text-decoration:none;">8. iRate Reviews</a>
-                            <a href="#payments" style="color:var(--primary);text-decoration:none;">9. Payments & Transactions</a>
-                            <a href="#prohibited" style="color:var(--primary);text-decoration:none;">10. Prohibited Items</a>
-                            <a href="#fees" style="color:var(--primary);text-decoration:none;">11. Fees & Subscriptions</a>
-                            <a href="#liability" style="color:var(--primary);text-decoration:none;">12. Liability</a>
+                            <a onclick="document.getElementById('intro').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">1. Introduction</a>
+                            <a onclick="document.getElementById('membership').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">2. Membership Types</a>
+                            <a onclick="document.getElementById('accounts').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">3. Account Registration</a>
+                            <a onclick="document.getElementById('verification').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">4. Identity Verification</a>
+                            <a onclick="document.getElementById('listings').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">5. Listings</a>
+                            <a onclick="document.getElementById('buying').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">6. Buying on iSQROLL</a>
+                            <a onclick="document.getElementById('ichat').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">7. iChat Messaging</a>
+                            <a onclick="document.getElementById('irate').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">8. iRate Reviews</a>
+                            <a onclick="document.getElementById('payments').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">9. Payments & Transactions</a>
+                            <a onclick="document.getElementById('prohibited').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">10. Prohibited Items</a>
+                            <a onclick="document.getElementById('fees').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">11. Fees & Subscriptions</a>
+                            <a onclick="document.getElementById('liability').scrollIntoView({behavior:'smooth'})" style="color:var(--primary);text-decoration:none;cursor:pointer;">12. Liability</a>
                         </div>
                     </div>
                 </div>

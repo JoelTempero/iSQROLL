@@ -277,18 +277,33 @@ const Components = {
 
         <!-- Message Modal -->
         <div class="modal-overlay" id="messageModal">
-            <div class="modal">
+            <div class="modal" style="max-width:500px;">
                 <div class="modal-header">
-                    <h3 class="modal-title">Send Message</h3>
+                    <h3 class="modal-title">iChat - Send Message</h3>
                     <button class="modal-close" onclick="closeModal('message')">✕</button>
                 </div>
                 <div class="modal-body">
+                    <div id="messageListingPreview" style="display:none;background:var(--slate-50);padding:12px;border-radius:6px;margin-bottom:16px;">
+                        <div style="display:flex;gap:12px;align-items:center;">
+                            <img id="messageListingImage" src="" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:6px;">
+                            <div style="flex:1;min-width:0;">
+                                <h4 id="messageListingTitle" style="font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></h4>
+                                <p id="messageListingPrice" style="font-size:14px;font-weight:600;color:var(--primary);margin:0;"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="messageListingId">
+                    <input type="hidden" id="messageSellerId">
+                    <input type="hidden" id="messageSellerName">
                     <form onsubmit="sendMessage(event)">
                         <div class="form-group">
-                            <label class="form-label">Your Message</label>
-                            <textarea class="form-input form-textarea" id="messageText" placeholder="Hi, I'm interested in this listing..." required></textarea>
+                            <label class="form-label">To: <span id="messageRecipient" style="font-weight:600;"></span></label>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="width:100%;">Send Message</button>
+                        <div class="form-group">
+                            <label class="form-label">Your Message</label>
+                            <textarea class="form-input form-textarea" id="messageText" placeholder="Hi, I'm interested in this listing..." required style="min-height:120px;"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width:100%;">Send via iChat</button>
                     </form>
                 </div>
             </div>
@@ -315,9 +330,29 @@ const App = {
     messages: [],
     currentPage: 'home',
     currentListingId: null,
+    currentConversationId: null,
+    // Search & Filter State
     searchQuery: '',
     searchCategory: '',
     searchGroup: '',
+    filters: {
+        location: '',
+        priceMin: '',
+        priceMax: '',
+        condition: '',
+        saleType: '',
+        shipping: '',
+        sortBy: 'newest',
+        // Vehicle specific
+        make: '',
+        model: '',
+        yearMin: '',
+        yearMax: '',
+        transmission: '',
+        // Property specific
+        bedrooms: '',
+        bathrooms: ''
+    },
 
     // Check if current user is admin
     isAdmin() {
@@ -493,23 +528,152 @@ const App = {
 
     getFiltered() {
         let results = [...this.listings];
+        const f = this.filters;
+
+        // Category group filter
         if (this.searchGroup) {
             const groupCats = this.categories.filter(c => c.group === this.searchGroup).map(c => c.id);
             results = results.filter(l => groupCats.includes(l.category));
         }
+
+        // Category filter
         if (this.searchCategory) {
             results = results.filter(l => l.category === this.searchCategory);
         }
+
+        // Text search
         if (this.searchQuery) {
             const q = this.searchQuery.toLowerCase();
-            results = results.filter(l => 
-                l.title?.toLowerCase().includes(q) || 
+            results = results.filter(l =>
+                l.title?.toLowerCase().includes(q) ||
                 l.description?.toLowerCase().includes(q) ||
                 l.make?.toLowerCase().includes(q) ||
                 l.model?.toLowerCase().includes(q)
             );
         }
+
+        // Location filter
+        if (f.location) {
+            results = results.filter(l => l.location === f.location);
+        }
+
+        // Price range
+        if (f.priceMin) {
+            results = results.filter(l => l.price && l.price >= parseInt(f.priceMin));
+        }
+        if (f.priceMax) {
+            results = results.filter(l => l.price && l.price <= parseInt(f.priceMax));
+        }
+
+        // Condition filter
+        if (f.condition) {
+            results = results.filter(l => l.condition?.toLowerCase() === f.condition.toLowerCase());
+        }
+
+        // Sale type filter
+        if (f.saleType) {
+            results = results.filter(l => (l.saleType || 'buynow') === f.saleType);
+        }
+
+        // Shipping filter
+        if (f.shipping) {
+            if (f.shipping === 'pickup') {
+                results = results.filter(l => !l.shipping || l.shipping.toLowerCase().includes('pickup'));
+            } else if (f.shipping === 'delivery') {
+                results = results.filter(l => l.shipping && l.shipping.toLowerCase().includes('deliver'));
+            }
+        }
+
+        // Vehicle-specific filters
+        if (f.make) {
+            results = results.filter(l => l.make?.toLowerCase().includes(f.make.toLowerCase()));
+        }
+        if (f.model) {
+            results = results.filter(l => l.model?.toLowerCase().includes(f.model.toLowerCase()));
+        }
+        if (f.yearMin) {
+            results = results.filter(l => l.year && l.year >= parseInt(f.yearMin));
+        }
+        if (f.yearMax) {
+            results = results.filter(l => l.year && l.year <= parseInt(f.yearMax));
+        }
+        if (f.transmission) {
+            results = results.filter(l => l.transmission?.toLowerCase() === f.transmission.toLowerCase());
+        }
+
+        // Property-specific filters
+        if (f.bedrooms) {
+            const beds = parseInt(f.bedrooms);
+            if (f.bedrooms === '5+') {
+                results = results.filter(l => l.bedrooms && l.bedrooms >= 5);
+            } else {
+                results = results.filter(l => l.bedrooms && l.bedrooms >= beds);
+            }
+        }
+        if (f.bathrooms) {
+            const baths = parseInt(f.bathrooms);
+            if (f.bathrooms === '3+') {
+                results = results.filter(l => l.bathrooms && l.bathrooms >= 3);
+            } else {
+                results = results.filter(l => l.bathrooms && l.bathrooms >= baths);
+            }
+        }
+
+        // Sorting
+        switch (f.sortBy) {
+            case 'newest':
+                results.sort((a, b) => (b.createdAt?.toDate?.() || 0) - (a.createdAt?.toDate?.() || 0));
+                break;
+            case 'oldest':
+                results.sort((a, b) => (a.createdAt?.toDate?.() || 0) - (b.createdAt?.toDate?.() || 0));
+                break;
+            case 'price-low':
+                results.sort((a, b) => (a.price || 999999999) - (b.price || 999999999));
+                break;
+            case 'price-high':
+                results.sort((a, b) => (b.price || 0) - (a.price || 0));
+                break;
+            case 'ending-soon':
+                results.sort((a, b) => {
+                    const aExp = a.expiresAt?.toDate?.() || new Date('2099-01-01');
+                    const bExp = b.expiresAt?.toDate?.() || new Date('2099-01-01');
+                    return aExp - bExp;
+                });
+                break;
+        }
+
         return results;
+    },
+
+    clearFilters() {
+        this.searchQuery = '';
+        this.searchCategory = '';
+        this.searchGroup = '';
+        this.filters = {
+            location: '',
+            priceMin: '',
+            priceMax: '',
+            condition: '',
+            saleType: '',
+            shipping: '',
+            sortBy: 'newest',
+            make: '',
+            model: '',
+            yearMin: '',
+            yearMax: '',
+            transmission: '',
+            bedrooms: '',
+            bathrooms: ''
+        };
+        this.render();
+    },
+
+    hasActiveFilters() {
+        const f = this.filters;
+        return this.searchQuery || this.searchCategory || this.searchGroup ||
+            f.location || f.priceMin || f.priceMax || f.condition || f.saleType ||
+            f.shipping || f.make || f.model || f.yearMin || f.yearMax ||
+            f.transmission || f.bedrooms || f.bathrooms;
     },
 
     async toggleSave(id) {
@@ -594,7 +758,7 @@ const App = {
                     ${l.currentBid ? `<p style="color:var(--primary);font-weight:600;">Winning bid: $${l.currentBid.toLocaleString()}</p>` : ''}
                 </div>
                 `}
-                <button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Ask Seller a Question</button>
+                <button class="btn btn-ghost" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Ask Seller a Question</button>
             `;
         } else {
             // Buy Now listing
@@ -603,8 +767,8 @@ const App = {
                     <span class="current">${l.priceDisplay || '$' + (l.price || 0).toLocaleString()}</span>
                 </div>
                 <div class="listing-buying-options">
-                    <button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">Contact Seller</button>
-                    ${l.price ? `<button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? `showToast('Purchase request sent!')` : "openModal('login')"}">Buy for NZ$ ${l.price.toLocaleString()}</button>` : ''}
+                    <button class="btn btn-accent btn-lg" style="width:100%;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Contact Seller</button>
+                    ${l.price ? `<button class="btn btn-primary btn-lg" style="width:100%;margin-top:12px;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Buy for NZ$ ${l.price.toLocaleString()}</button>` : ''}
                 </div>
             `;
         }
@@ -788,20 +952,146 @@ const App = {
         const groupName = this.searchGroup ? this.categoryGroups.find(g => g.id === this.searchGroup)?.name : '';
         const catName = this.searchCategory ? this.categories.find(c => c.id === this.searchCategory)?.name : '';
         const title = catName || groupName || 'All Listings';
+        const f = this.filters;
+        const isVehicleSearch = this.searchGroup === 'automotive' || (this.searchCategory && this.categories.find(c => c.id === this.searchCategory)?.group === 'automotive');
+        const isPropertySearch = this.searchGroup === 'property' || (this.searchCategory && this.categories.find(c => c.id === this.searchCategory)?.group === 'property');
 
         return `
         ${this.renderSearch()}
-        <section class="section"><div class="container">
-            <div class="section-header">
-                <h2>${title} <span class="text-muted">(${listings.length})</span></h2>
-                ${(this.searchCategory || this.searchGroup || this.searchQuery) ? 
-                    `<button class="btn btn-ghost" onclick="App.searchCategory='';App.searchGroup='';App.searchQuery='';App.render();">Clear filters ✕</button>` : ''}
+        <section class="section" style="padding-top:20px;"><div class="container">
+            <div class="browse-layout" style="display:grid;grid-template-columns:280px 1fr;gap:24px;">
+                <!-- Filter Sidebar -->
+                <div class="filter-sidebar">
+                    <div class="card" style="position:sticky;top:80px;">
+                        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                            <h3 class="card-title" style="margin:0;">Filters</h3>
+                            ${this.hasActiveFilters() ? `<button class="btn btn-ghost btn-sm" onclick="App.clearFilters()">Clear all</button>` : ''}
+                        </div>
+                        <div class="card-body" style="padding:16px;">
+                            <!-- Sort -->
+                            <div class="filter-group" style="margin-bottom:20px;">
+                                <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Sort by</label>
+                                <select class="form-input form-select" id="filterSort" onchange="App.filters.sortBy=this.value;App.render();">
+                                    <option value="newest" ${f.sortBy === 'newest' ? 'selected' : ''}>Newest first</option>
+                                    <option value="oldest" ${f.sortBy === 'oldest' ? 'selected' : ''}>Oldest first</option>
+                                    <option value="price-low" ${f.sortBy === 'price-low' ? 'selected' : ''}>Price: Low to High</option>
+                                    <option value="price-high" ${f.sortBy === 'price-high' ? 'selected' : ''}>Price: High to Low</option>
+                                    <option value="ending-soon" ${f.sortBy === 'ending-soon' ? 'selected' : ''}>Ending Soon</option>
+                                </select>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="filter-group" style="margin-bottom:20px;">
+                                <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Location</label>
+                                <select class="form-input form-select" id="filterLocation" onchange="App.filters.location=this.value;App.render();">
+                                    <option value="">All New Zealand</option>
+                                    ${NZ_REGIONS.map(r => `<option value="${r}" ${f.location === r ? 'selected' : ''}>${r}</option>`).join('')}
+                                </select>
+                            </div>
+
+                            <!-- Price Range -->
+                            <div class="filter-group" style="margin-bottom:20px;">
+                                <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Price Range</label>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <input type="number" class="form-input" placeholder="Min" id="filterPriceMin" value="${f.priceMin}" style="width:100%;">
+                                    <span style="color:var(--slate-400);">-</span>
+                                    <input type="number" class="form-input" placeholder="Max" id="filterPriceMax" value="${f.priceMax}" style="width:100%;">
+                                </div>
+                                <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;" onclick="App.filters.priceMin=document.getElementById('filterPriceMin').value;App.filters.priceMax=document.getElementById('filterPriceMax').value;App.render();">Apply Price</button>
+                            </div>
+
+                            <!-- Sale Type -->
+                            <div class="filter-group" style="margin-bottom:20px;">
+                                <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Sale Type</label>
+                                <select class="form-input form-select" onchange="App.filters.saleType=this.value;App.render();">
+                                    <option value="">All</option>
+                                    <option value="buynow" ${f.saleType === 'buynow' ? 'selected' : ''}>Buy Now</option>
+                                    <option value="auction" ${f.saleType === 'auction' ? 'selected' : ''}>Auction</option>
+                                </select>
+                            </div>
+
+                            <!-- Condition -->
+                            <div class="filter-group" style="margin-bottom:20px;">
+                                <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Condition</label>
+                                <select class="form-input form-select" onchange="App.filters.condition=this.value;App.render();">
+                                    <option value="">Any Condition</option>
+                                    <option value="new" ${f.condition === 'new' ? 'selected' : ''}>New</option>
+                                    <option value="used" ${f.condition === 'used' ? 'selected' : ''}>Used</option>
+                                    <option value="refurbished" ${f.condition === 'refurbished' ? 'selected' : ''}>Refurbished</option>
+                                </select>
+                            </div>
+
+                            ${isVehicleSearch ? `
+                            <!-- Vehicle Filters -->
+                            <div style="border-top:1px solid var(--slate-200);padding-top:16px;margin-top:16px;">
+                                <h4 style="font-size:14px;margin-bottom:16px;">Vehicle Filters</h4>
+                                <div class="filter-group" style="margin-bottom:12px;">
+                                    <input type="text" class="form-input" placeholder="Make (e.g. Toyota)" value="${f.make}" onchange="App.filters.make=this.value;App.render();">
+                                </div>
+                                <div class="filter-group" style="margin-bottom:12px;">
+                                    <input type="text" class="form-input" placeholder="Model (e.g. Corolla)" value="${f.model}" onchange="App.filters.model=this.value;App.render();">
+                                </div>
+                                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                                    <input type="number" class="form-input" placeholder="Year from" value="${f.yearMin}" onchange="App.filters.yearMin=this.value;App.render();">
+                                    <input type="number" class="form-input" placeholder="Year to" value="${f.yearMax}" onchange="App.filters.yearMax=this.value;App.render();">
+                                </div>
+                                <select class="form-input form-select" onchange="App.filters.transmission=this.value;App.render();">
+                                    <option value="">Any Transmission</option>
+                                    <option value="automatic" ${f.transmission === 'automatic' ? 'selected' : ''}>Automatic</option>
+                                    <option value="manual" ${f.transmission === 'manual' ? 'selected' : ''}>Manual</option>
+                                </select>
+                            </div>
+                            ` : ''}
+
+                            ${isPropertySearch ? `
+                            <!-- Property Filters -->
+                            <div style="border-top:1px solid var(--slate-200);padding-top:16px;margin-top:16px;">
+                                <h4 style="font-size:14px;margin-bottom:16px;">Property Filters</h4>
+                                <div class="filter-group" style="margin-bottom:12px;">
+                                    <label class="filter-label" style="font-size:12px;color:var(--slate-500);display:block;margin-bottom:4px;">Bedrooms</label>
+                                    <select class="form-input form-select" onchange="App.filters.bedrooms=this.value;App.render();">
+                                        <option value="">Any</option>
+                                        <option value="1" ${f.bedrooms === '1' ? 'selected' : ''}>1+</option>
+                                        <option value="2" ${f.bedrooms === '2' ? 'selected' : ''}>2+</option>
+                                        <option value="3" ${f.bedrooms === '3' ? 'selected' : ''}>3+</option>
+                                        <option value="4" ${f.bedrooms === '4' ? 'selected' : ''}>4+</option>
+                                        <option value="5+" ${f.bedrooms === '5+' ? 'selected' : ''}>5+</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label class="filter-label" style="font-size:12px;color:var(--slate-500);display:block;margin-bottom:4px;">Bathrooms</label>
+                                    <select class="form-input form-select" onchange="App.filters.bathrooms=this.value;App.render();">
+                                        <option value="">Any</option>
+                                        <option value="1" ${f.bathrooms === '1' ? 'selected' : ''}>1+</option>
+                                        <option value="2" ${f.bathrooms === '2' ? 'selected' : ''}>2+</option>
+                                        <option value="3+" ${f.bathrooms === '3+' ? 'selected' : ''}>3+</option>
+                                    </select>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listings Grid -->
+                <div>
+                    <div class="section-header" style="margin-bottom:20px;">
+                        <h2 style="font-size:1.25rem;">${title} <span class="text-muted" style="font-weight:400;">(${listings.length} results)</span></h2>
+                    </div>
+                    ${listings.length ?
+                        `<div class="listings-grid">${listings.map(l => this.renderCard(l)).join('')}</div>` :
+                        `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No listings found</h3><p>Try adjusting your filters</p><button class="btn btn-primary" onclick="App.clearFilters()">Clear Filters</button></div>`
+                    }
+                </div>
             </div>
-            ${listings.length ? 
-                `<div class="listings-grid">${listings.map(l => this.renderCard(l)).join('')}</div>` : 
-                `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No listings found</h3><p>Try a different search</p></div>`
+        </div></section>
+
+        <style>
+            @media (max-width: 900px) {
+                .browse-layout { grid-template-columns: 1fr !important; }
+                .filter-sidebar { display: none; }
             }
-        </div></section>`;
+        </style>`;
     },
 
     renderCategories() {
@@ -1282,16 +1572,151 @@ const App = {
 
     renderMessages() {
         if (!this.currentUser) { openModal('login'); return ''; }
+
+        // Check if we're viewing a specific conversation
+        if (this.currentConversationId) {
+            return this.renderConversationDetail();
+        }
+
         return `
-        <div class="page-header"><div class="container"><h1>Messages</h1></div></div>
+        <div class="page-header"><div class="container"><h1>iChat Messages</h1><p class="lead">Your conversations</p></div></div>
         <div class="container section">
-            <div class="empty-state">
-                <div class="empty-state-icon">💬</div>
-                <h3>No messages yet</h3>
-                <p>When you contact a seller or receive enquiries, they'll appear here</p>
-                <button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button>
+            <div id="conversationsList">
+                <div style="text-align:center;padding:40px;">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted">Loading conversations...</p>
+                </div>
             </div>
-        </div>`;
+        </div>
+        <script>
+            (async () => {
+                const conversations = await loadConversations();
+                const container = document.getElementById('conversationsList');
+                if (!container) return;
+
+                if (conversations.length === 0) {
+                    container.innerHTML = \`
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <h3>No messages yet</h3>
+                            <p>When you contact a seller or receive enquiries, they'll appear here</p>
+                            <button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button>
+                        </div>
+                    \`;
+                    return;
+                }
+
+                container.innerHTML = conversations.map(conv => {
+                    const otherUserId = conv.participants.find(id => id !== App.currentUser.uid);
+                    const otherUserName = conv.participantNames?.[otherUserId] || 'User';
+                    const isUnread = conv.unreadBy === App.currentUser.uid;
+                    const timeAgo = conv.lastMessageAt?.toDate ? App.timeAgo(conv.lastMessageAt.toDate()) : '';
+
+                    return \`
+                    <div class="card" style="margin-bottom:12px;cursor:pointer;\${isUnread ? 'border-left:4px solid var(--primary);' : ''}" onclick="App.currentConversationId='\${conv.id}';App.render();">
+                        <div class="card-body" style="padding:16px;">
+                            <div style="display:flex;gap:12px;align-items:center;">
+                                <img src="\${conv.listingImage || 'https://picsum.photos/60/60?grayscale'}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+                                <div style="flex:1;min-width:0;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                        <h4 style="font-size:14px;margin:0;\${isUnread ? 'font-weight:700;' : ''}">\${otherUserName}</h4>
+                                        <span style="font-size:12px;color:var(--slate-500);">\${timeAgo}</span>
+                                    </div>
+                                    <p style="font-size:13px;color:var(--slate-600);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\${conv.listingTitle}</p>
+                                    <p style="font-size:13px;color:var(--slate-500);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\${isUnread ? 'font-weight:600;color:var(--slate-700);' : ''}">\${conv.lastMessage}</p>
+                                </div>
+                                \${isUnread ? '<div style="width:10px;height:10px;background:var(--primary);border-radius:50%;"></div>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                    \`;
+                }).join('');
+            })();
+        </script>`;
+    },
+
+    renderConversationDetail() {
+        return `
+        <div class="page-header">
+            <div class="container">
+                <button class="btn btn-ghost" onclick="App.currentConversationId=null;App.render();" style="margin-bottom:8px;">← Back to Messages</button>
+                <h1>Conversation</h1>
+            </div>
+        </div>
+        <div class="container section">
+            <div id="conversationDetail">
+                <div style="text-align:center;padding:40px;">
+                    <div class="loading-spinner"></div>
+                    <p class="text-muted">Loading messages...</p>
+                </div>
+            </div>
+        </div>
+        <script>
+            (async () => {
+                const conversationId = '${this.currentConversationId}';
+                const conversationDoc = await db.collection('conversations').doc(conversationId).get();
+                const conversation = conversationDoc.data();
+                const messages = await loadMessages(conversationId);
+                const container = document.getElementById('conversationDetail');
+                if (!container) return;
+
+                const otherUserId = conversation.participants.find(id => id !== App.currentUser.uid);
+                const otherUserName = conversation.participantNames?.[otherUserId] || 'User';
+
+                // Mark as read if we're the unread user
+                if (conversation.unreadBy === App.currentUser.uid) {
+                    await db.collection('conversations').doc(conversationId).update({ unreadBy: null });
+                }
+
+                container.innerHTML = \`
+                    <!-- Listing Preview -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-body" style="padding:16px;">
+                            <div style="display:flex;gap:12px;align-items:center;">
+                                <img src="\${conversation.listingImage || 'https://picsum.photos/80/80?grayscale'}" alt="" style="width:70px;height:70px;object-fit:cover;border-radius:6px;">
+                                <div style="flex:1;">
+                                    <h4 style="font-size:15px;margin-bottom:4px;">\${conversation.listingTitle}</h4>
+                                    <p style="font-size:15px;font-weight:600;color:var(--primary);margin:0;">\${conversation.listingPrice ? '$' + conversation.listingPrice.toLocaleString() : 'Price on Application'}</p>
+                                </div>
+                                <button class="btn btn-secondary btn-sm" onclick="App.navigate('listing','\${conversation.listingId}')">View Listing</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Conversation with \${otherUserName}</h3>
+                        </div>
+                        <div class="card-body" style="padding:0;max-height:400px;overflow-y:auto;">
+                            \${messages.map(msg => {
+                                const isMine = msg.senderId === App.currentUser.uid;
+                                const time = msg.createdAt?.toDate ? App.timeAgo(msg.createdAt.toDate()) : '';
+                                return \`
+                                <div style="padding:16px;border-bottom:1px solid var(--slate-100);\${isMine ? 'background:var(--slate-50);' : ''}">
+                                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                                        <span style="font-weight:600;font-size:13px;">\${isMine ? 'You' : msg.senderName}</span>
+                                        <span style="font-size:12px;color:var(--slate-500);">\${time}</span>
+                                    </div>
+                                    <p style="margin:0;color:var(--slate-700);line-height:1.6;">\${msg.text}</p>
+                                </div>
+                                \`;
+                            }).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Reply Form -->
+                    <div class="card" style="margin-top:16px;">
+                        <div class="card-body" style="padding:16px;">
+                            <div style="display:flex;gap:12px;">
+                                <textarea id="replyInput" class="form-input" placeholder="Type your reply..." style="flex:1;min-height:60px;resize:none;"></textarea>
+                                <button class="btn btn-primary" onclick="sendReply('\${conversationId}')" style="align-self:flex-end;">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                \`;
+            })();
+        </script>`;
     },
 
     renderPricing() {
@@ -1693,14 +2118,198 @@ function toggleSubscriptionTier() {
     }
 }
 
-function showToast(msg, type = 'success') { 
+// ============================================
+// iChat MESSAGING SYSTEM
+// ============================================
+
+function openMessageModal(listingId) {
+    const listing = App.listings.find(l => l.id === listingId);
+    if (!listing) {
+        showToast('Listing not found', 'error');
+        return;
+    }
+
+    // Populate modal with listing info
+    document.getElementById('messageListingId').value = listingId;
+    document.getElementById('messageSellerId').value = listing.sellerId;
+    document.getElementById('messageSellerName').value = listing.sellerName || 'Seller';
+    document.getElementById('messageRecipient').textContent = listing.sellerName || 'Seller';
+
+    // Show listing preview
+    const preview = document.getElementById('messageListingPreview');
+    document.getElementById('messageListingImage').src = listing.images?.[0] || 'https://picsum.photos/100/100?grayscale';
+    document.getElementById('messageListingTitle').textContent = listing.title;
+    document.getElementById('messageListingPrice').textContent = listing.price ? `$${listing.price.toLocaleString()}` : 'Price on Application';
+    preview.style.display = 'block';
+
+    // Clear previous message
+    document.getElementById('messageText').value = '';
+
+    openModal('message');
+}
+
+async function sendMessage(event) {
+    event.preventDefault();
+
+    if (!App.currentUser) {
+        openModal('login');
+        return;
+    }
+
+    const listingId = document.getElementById('messageListingId').value;
+    const sellerId = document.getElementById('messageSellerId').value;
+    const sellerName = document.getElementById('messageSellerName').value;
+    const messageText = document.getElementById('messageText').value.trim();
+
+    if (!messageText) {
+        showToast('Please enter a message', 'error');
+        return;
+    }
+
+    const listing = App.listings.find(l => l.id === listingId);
+
+    try {
+        // Create conversation ID (sorted user IDs for consistency)
+        const participants = [App.currentUser.uid, sellerId].sort();
+        const conversationId = `${participants[0]}_${participants[1]}_${listingId}`;
+
+        // Create or update conversation
+        const conversationRef = db.collection('conversations').doc(conversationId);
+        const conversationDoc = await conversationRef.get();
+
+        if (!conversationDoc.exists) {
+            // Create new conversation
+            await conversationRef.set({
+                participants: participants,
+                participantNames: {
+                    [App.currentUser.uid]: App.currentUser.displayName || 'User',
+                    [sellerId]: sellerName
+                },
+                listingId: listingId,
+                listingTitle: listing?.title || 'Listing',
+                listingImage: listing?.images?.[0] || '',
+                listingPrice: listing?.price || null,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessage: messageText,
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessageBy: App.currentUser.uid,
+                unreadBy: sellerId
+            });
+        } else {
+            // Update existing conversation
+            await conversationRef.update({
+                lastMessage: messageText,
+                lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastMessageBy: App.currentUser.uid,
+                unreadBy: sellerId
+            });
+        }
+
+        // Add message to subcollection
+        await conversationRef.collection('messages').add({
+            senderId: App.currentUser.uid,
+            senderName: App.currentUser.displayName || 'User',
+            text: messageText,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
+
+        closeModal('message');
+        showToast('Message sent via iChat!');
+
+    } catch (e) {
+        console.error('Send message error:', e);
+        showToast('Failed to send message: ' + e.message, 'error');
+    }
+}
+
+async function loadConversations() {
+    if (!App.currentUser) return [];
+
+    try {
+        const snapshot = await db.collection('conversations')
+            .where('participants', 'array-contains', App.currentUser.uid)
+            .orderBy('lastMessageAt', 'desc')
+            .limit(50)
+            .get();
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (e) {
+        console.error('Load conversations error:', e);
+        return [];
+    }
+}
+
+async function loadMessages(conversationId) {
+    try {
+        const snapshot = await db.collection('conversations')
+            .doc(conversationId)
+            .collection('messages')
+            .orderBy('createdAt', 'asc')
+            .get();
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+    } catch (e) {
+        console.error('Load messages error:', e);
+        return [];
+    }
+}
+
+async function sendReply(conversationId) {
+    const input = document.getElementById('replyInput');
+    const text = input?.value.trim();
+
+    if (!text || !App.currentUser) return;
+
+    try {
+        const conversationRef = db.collection('conversations').doc(conversationId);
+        const conversationDoc = await conversationRef.get();
+        const conversation = conversationDoc.data();
+
+        // Find the other participant
+        const otherUserId = conversation.participants.find(id => id !== App.currentUser.uid);
+
+        // Add message
+        await conversationRef.collection('messages').add({
+            senderId: App.currentUser.uid,
+            senderName: App.currentUser.displayName || 'User',
+            text: text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            read: false
+        });
+
+        // Update conversation
+        await conversationRef.update({
+            lastMessage: text,
+            lastMessageAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastMessageBy: App.currentUser.uid,
+            unreadBy: otherUserId
+        });
+
+        // Reload conversation view
+        App.render();
+        showToast('Reply sent!');
+
+    } catch (e) {
+        console.error('Send reply error:', e);
+        showToast('Failed to send reply', 'error');
+    }
+}
+
+function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    const m = document.getElementById('toastMsg'); 
-    if (t && m) { 
-        m.textContent = msg; 
-        t.className = 'toast show ' + type; 
-        setTimeout(() => t.classList.remove('show'), 3000); 
-    } 
+    const m = document.getElementById('toastMsg');
+    if (t && m) {
+        m.textContent = msg;
+        t.className = 'toast show ' + type;
+        setTimeout(() => t.classList.remove('show'), 3000);
+    }
 }
 
 function doSearch() { 
