@@ -96,6 +96,34 @@ const Components = {
         </header>`;
     },
 
+    bottomNav() {
+        const page = App.currentPage;
+        return `
+        <nav class="bottom-nav">
+            <div class="bottom-nav-inner">
+                <div class="bottom-nav-item ${page === 'home' ? 'active' : ''}" onclick="App.navigate('home')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                    <span>Home</span>
+                </div>
+                <div class="bottom-nav-item ${page === 'messages' ? 'active' : ''}" onclick="${App.currentUser ? "App.navigate('messages')" : "openModal('login')"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>iChat</span>
+                </div>
+                <div class="bottom-nav-item center" onclick="${App.currentUser ? "App.navigate('create')" : "openModal('login')"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <div class="bottom-nav-item ${page === 'watchlist' ? 'active' : ''}" onclick="${App.currentUser ? "App.navigate('watchlist')" : "openModal('login')"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>iWatch</span>
+                </div>
+                <div class="bottom-nav-item ${page === 'profile' || page === 'my-listings' || page === 'saved' ? 'active' : ''}" onclick="${App.currentUser ? "App.navigate('profile')" : "openModal('login')"}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>Profile</span>
+                </div>
+            </div>
+        </nav>`;
+    },
+
     footer() {
         return `
         <footer class="footer">
@@ -331,6 +359,7 @@ const App = {
     currentPage: 'home',
     currentListingId: null,
     currentConversationId: null,
+    selectedListingType: null,
     // Search & Filter State
     searchQuery: '',
     searchCategory: '',
@@ -438,9 +467,10 @@ const App = {
     },
 
     render() {
-        document.body.innerHTML = Components.header() + 
-            '<div id="app">' + this.renderPage() + '</div>' + 
-            Components.footer() + 
+        document.body.innerHTML = Components.header() +
+            '<div id="app">' + this.renderPage() + '</div>' +
+            Components.footer() +
+            Components.bottomNav() +
             Components.modals();
     },
 
@@ -454,6 +484,9 @@ const App = {
             case 'edit-profile': return this.renderEditProfile();
             case 'my-listings': return this.renderMyListings();
             case 'saved': return this.renderSaved();
+            case 'watchlist': return this.renderWatchlist();
+            case 'auction-results': return this.renderAuctionResults();
+            case 'reviews': return this.renderReviews();
             case 'messages': return this.renderMessages();
             case 'create': return this.renderCreateListing();
             case 'pricing': return this.renderPricing();
@@ -822,6 +855,35 @@ const App = {
         </div>`;
     },
 
+    // Mobile app style listing card with watchlist icon and Send Offer/Buy Now buttons
+    renderMobileCard(l) {
+        const saved = this.savedItems.includes(l.id);
+        const priceDisplay = l.saleType === 'auction'
+            ? (l.currentBid ? `$${l.currentBid.toLocaleString()}` : `$${(l.price || 0).toLocaleString()}`)
+            : (l.price ? `$${l.price.toLocaleString()}` : 'POA');
+
+        return `
+        <div class="listing-card-mobile">
+            <div class="listing-image" onclick="App.navigate('listing','${l.id}')">
+                <img src="${l.images?.[0] || 'https://picsum.photos/400/300?grayscale'}" alt="${l.title}" loading="lazy">
+                <button class="watchlist-btn ${saved ? 'active' : ''}" onclick="event.stopPropagation();App.toggleSave('${l.id}')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="${saved ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                ${l.featured ? '<span class="listing-badge">Featured</span>' : ''}
+                ${l.saleType === 'auction' ? '<span class="listing-badge" style="background:#7c3aed;">Auction</span>' : ''}
+                ${l.listingType === 'vehicle' ? '<span class="listing-badge" style="background:var(--slate-800);">Vehicle</span>' : ''}
+                ${l.listingType === 'property' ? '<span class="listing-badge" style="background:var(--primary);">Property</span>' : ''}
+            </div>
+            <div class="listing-content">
+                <h3 class="listing-title">${l.title}</h3>
+                <div class="listing-actions">
+                    <div class="btn-offer" onclick="event.stopPropagation();${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Send an Offer</div>
+                    <div class="btn-buynow" onclick="App.navigate('listing','${l.id}')">Buy Now: NZ${priceDisplay}</div>
+                </div>
+            </div>
+        </div>`;
+    },
+
     renderSearch() {
         return `
         <section class="search-section">
@@ -857,7 +919,18 @@ const App = {
         const property = this.listings.filter(l => l.listingType === 'property').slice(0, 4);
         const recent = this.listings.slice(0, 8);
 
+        // Welcome header for logged in users
+        const welcomeHeader = this.currentUser ? `
+        <section style="background:linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);color:white;padding:24px 0;">
+            <div class="container">
+                <h2 style="color:white;margin-bottom:4px;">Welcome back, ${this.currentUser.displayName?.split(' ')[0] || 'there'}!</h2>
+                <p style="color:rgba(255,255,255,0.8);margin:0;">What would you like to do today?</p>
+            </div>
+        </section>` : '';
+
         return `
+        ${welcomeHeader}
+
         <section class="hero">
             <div class="container">
                 <div class="hero-grid">
@@ -886,9 +959,47 @@ const App = {
                 </div>
             </div>
         </section>
-        
+
         ${this.renderSearch()}
-        
+
+        <!-- Popular Categories - Mobile App Style -->
+        <section class="section" style="background:var(--white);">
+            <div class="container">
+                <div class="section-header"><h2>Popular Categories</h2><button class="btn btn-ghost" onclick="App.navigate('categories')">See all →</button></div>
+                <div class="popular-categories">
+                    <div class="popular-category-card" onclick="App.searchGroup='automotive';App.searchCategory='';App.navigate('browse');">
+                        <div class="icon">🚗</div>
+                        <h4>Vehicles</h4>
+                        <p>${this.listings.filter(l => l.listingType === 'vehicle').length} listings</p>
+                    </div>
+                    <div class="popular-category-card" onclick="App.searchGroup='property';App.searchCategory='';App.navigate('browse');">
+                        <div class="icon">🏠</div>
+                        <h4>Property</h4>
+                        <p>${this.listings.filter(l => l.listingType === 'property').length} listings</p>
+                    </div>
+                    <div class="popular-category-card" onclick="App.searchGroup='electronics';App.searchCategory='';App.navigate('browse');">
+                        <div class="icon">📱</div>
+                        <h4>Electronics</h4>
+                        <p>${this.listings.filter(l => this.categories.find(c => c.id === l.category)?.group === 'electronics').length} listings</p>
+                    </div>
+                    <div class="popular-category-card" onclick="App.searchGroup='home';App.searchCategory='';App.navigate('browse');">
+                        <div class="icon">🛋️</div>
+                        <h4>Home & Living</h4>
+                        <p>${this.listings.filter(l => this.categories.find(c => c.id === l.category)?.group === 'home').length} listings</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Listings Near You -->
+        ${recent.length ? `
+        <section class="section">
+            <div class="container">
+                <div class="section-header"><h2>Listings Near to Me</h2><button class="btn btn-ghost" onclick="App.navigate('browse')">View all →</button></div>
+                <div class="listings-grid">${recent.slice(0, 4).map(l => this.renderMobileCard(l)).join('')}</div>
+            </div>
+        </section>` : ''}
+
         <!-- Category Groups -->
         <section class="section" style="background:var(--white);">
             <div class="container">
@@ -909,7 +1020,7 @@ const App = {
         <section class="section">
             <div class="container">
                 <div class="section-header"><h2>🚗 Vehicles</h2><button class="btn btn-ghost" onclick="App.searchGroup='automotive';App.navigate('browse')">View all →</button></div>
-                <div class="listings-grid">${vehicles.map(l => this.renderCard(l)).join('')}</div>
+                <div class="listings-grid">${vehicles.map(l => this.renderMobileCard(l)).join('')}</div>
             </div>
         </section>` : ''}
 
@@ -917,21 +1028,15 @@ const App = {
         <section class="section" style="background:var(--white);">
             <div class="container">
                 <div class="section-header"><h2>🏠 Property</h2><button class="btn btn-ghost" onclick="App.searchGroup='property';App.navigate('browse')">View all →</button></div>
-                <div class="listings-grid">${property.map(l => this.renderCard(l)).join('')}</div>
+                <div class="listings-grid">${property.map(l => this.renderMobileCard(l)).join('')}</div>
             </div>
         </section>` : ''}
 
-        ${recent.length ? `
-        <section class="section">
-            <div class="container">
-                <div class="section-header"><h2>Just Listed</h2></div>
-                <div class="listings-grid">${recent.map(l => this.renderCard(l)).join('')}</div>
-            </div>
-        </section>` : `
+        ${!recent.length ? `
         <section class="section"><div class="container">
             <div class="empty-state"><div class="empty-state-icon">📦</div><h3>No listings yet</h3><p>Seed the database with demo data!</p><button class="btn btn-primary" onclick="seedDatabase()">Seed Demo Data</button></div>
-        </div></section>`}
-        
+        </div></section>` : ''}
+
         <!-- Trust Section -->
         <section class="section" style="background:var(--slate-900);color:var(--white);">
             <div class="container" style="text-align:center;">
@@ -1476,33 +1581,142 @@ const App = {
 
     renderProfile() {
         if (!this.currentUser) { openModal('login'); return ''; }
+        const initial = (this.currentUser.displayName || this.currentUser.email)[0].toUpperCase();
         return `
-        <div class="page-header"><div class="container"><h1>My Profile</h1></div></div>
-        <div class="container" style="padding:40px 0;max-width:600px;">
-            <div class="card">
-                <div class="card-body" style="padding:40px;text-align:center;">
-                    <div class="profile-avatar" style="margin:0 auto 20px;">${(this.currentUser.displayName || this.currentUser.email)[0].toUpperCase()}</div>
-                    <h3>${this.currentUser.displayName || 'User'}</h3>
-                    <p class="text-muted">${this.currentUser.email}</p>
-                    <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
-                        <button class="btn btn-secondary" onclick="App.navigate('edit-profile')">Edit Profile</button>
+        <div class="page-header">
+            <div class="container">
+                <div style="display:flex;align-items:center;gap:20px;">
+                    <div class="profile-avatar">${initial}</div>
+                    <div>
+                        <h1 style="margin-bottom:4px;">${this.currentUser.displayName || 'User'}</h1>
+                        <p class="text-muted">${this.currentUser.email}</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="card" style="margin-top:24px;">
-                <div class="card-body">
-                    <h4 style="margin-bottom:16px;">Quick Actions</h4>
-                    <div style="display:grid;gap:12px;">
-                        <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="App.navigate('create')">📦 Create New Listing</button>
-                        <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="App.navigate('my-listings')">📋 My Listings</button>
-                        <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="App.navigate('saved')">❤️ Saved Items</button>
-                        <button class="btn btn-secondary" style="justify-content:flex-start;" onclick="App.navigate('messages')">💬 Messages</button>
+        </div>
+        <div class="container" style="padding:24px 16px;max-width:600px;">
+
+            <!-- SELLING SECTION -->
+            <div class="profile-menu-section">
+                <div class="profile-menu-section-title">Selling</div>
+                <div class="profile-menu-list">
+                    <div class="profile-menu-item" onclick="App.navigate('my-listings')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+                        <span>iSell</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('create')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>List An Item</span>
+                        <span class="arrow">→</span>
                     </div>
                 </div>
             </div>
-            
-            <button class="btn btn-ghost" style="width:100%;margin-top:24px;color:var(--error);" onclick="App.logout()">Log Out</button>
+
+            <!-- BUYING SECTION -->
+            <div class="profile-menu-section">
+                <div class="profile-menu-section-title">Buying</div>
+                <div class="profile-menu-list">
+                    <div class="profile-menu-item" onclick="App.navigate('browse')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                        <span>iBuy</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('watchlist')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>iWatch</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('auction-results')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                        <span>iWon / iLost</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('reviews')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <span>iRate</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PROFILE SECTION -->
+            <div class="profile-menu-section">
+                <div class="profile-menu-section-title">Profile</div>
+                <div class="profile-menu-list">
+                    <div class="profile-menu-item" onclick="App.navigate('messages')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <span>iChat</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="showToast('Notifications coming soon!')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span>Notifications</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('edit-profile')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <span>Account Settings</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="showToast('Reports coming soon!')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        <span>Reports</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFORMATION SECTION -->
+            <div class="profile-menu-section">
+                <div class="profile-menu-section-title">Information</div>
+                <div class="profile-menu-list">
+                    <div class="profile-menu-item" onclick="App.navigate('about')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span>About Us</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('faq')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span>FAQs</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('privacy')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span>Privacy Policy</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('terms')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>
+                        <span>Terms & Conditions</span>
+                        <span class="arrow">→</span>
+                    </div>
+                    <div class="profile-menu-item" onclick="App.navigate('contact')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        <span>Contact Us</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ADMIN SECTION (if admin) -->
+            ${this.isAdmin() ? `
+            <div class="profile-menu-section">
+                <div class="profile-menu-section-title" style="background:var(--primary);color:white;">Admin</div>
+                <div class="profile-menu-list">
+                    <div class="profile-menu-item" onclick="App.navigate('admin')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span>Admin Panel</span>
+                        <span class="arrow">→</span>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
+            <button class="btn btn-ghost" style="width:100%;margin-top:24px;color:var(--error);border:1px solid var(--error);" onclick="App.logout()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Log Out
+            </button>
         </div>`;
     },
 
@@ -1563,10 +1777,175 @@ const App = {
         if (!this.currentUser) { openModal('login'); return ''; }
         const saved = this.listings.filter(l => this.savedItems.includes(l.id));
         return `
-        <div class="page-header"><div class="container"><h1>Watchlist</h1><p class="lead">${saved.length} saved items</p></div></div>
+        <div class="page-header"><div class="container"><h1>Saved Items</h1><p class="lead">${saved.length} saved items</p></div></div>
         <div class="container section">
-            ${saved.length ? `<div class="listings-grid">${saved.map(l => this.renderCard(l)).join('')}</div>` : 
+            ${saved.length ? `<div class="listings-grid">${saved.map(l => this.renderCard(l)).join('')}</div>` :
             `<div class="empty-state"><div class="empty-state-icon">❤️</div><h3>No saved items</h3><p>Click the heart on listings to save them</p><button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button></div>`}
+        </div>`;
+    },
+
+    renderWatchlist() {
+        if (!this.currentUser) { openModal('login'); return ''; }
+        const watched = this.listings.filter(l => this.savedItems.includes(l.id));
+        return `
+        <div class="page-header">
+            <div class="container">
+                <h1>iWatch</h1>
+                <p class="lead">Keep an eye on listings you're interested in</p>
+            </div>
+        </div>
+        <div class="container section">
+            ${watched.length ? `
+                <div class="watchlist-grid">
+                    ${watched.map(l => {
+                        const priceDisplay = l.saleType === 'auction'
+                            ? (l.currentBid ? `$${l.currentBid.toLocaleString()}` : `Starting: $${(l.price || 0).toLocaleString()}`)
+                            : (l.price ? `$${l.price.toLocaleString()}` : 'POA');
+                        return `
+                        <div class="listing-card-mobile">
+                            <div class="listing-image" onclick="App.navigate('listing','${l.id}')">
+                                <img src="${l.images?.[0] || 'https://picsum.photos/400/300?grayscale'}" alt="${l.title}" loading="lazy">
+                                <button class="watchlist-btn active" onclick="event.stopPropagation();App.toggleSave('${l.id}')">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                ${l.saleType === 'auction' ? '<span class="listing-badge" style="background:#7c3aed;">Auction</span>' : ''}
+                            </div>
+                            <div class="listing-content">
+                                <h3 class="listing-title">${l.title}</h3>
+                                <div class="listing-actions">
+                                    <div class="btn-offer" onclick="event.stopPropagation();${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Send an Offer</div>
+                                    <div class="btn-buynow" onclick="App.navigate('listing','${l.id}')">Buy Now: NZ${priceDisplay}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('')}
+                </div>
+            ` : `
+                <div class="empty-state">
+                    <div class="empty-state-icon">👁️</div>
+                    <h3>Nothing in your watchlist</h3>
+                    <p>Tap the eye icon on listings to add them to your watchlist</p>
+                    <button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button>
+                </div>
+            `}
+        </div>`;
+    },
+
+    renderAuctionResults() {
+        if (!this.currentUser) { openModal('login'); return ''; }
+        // For demo, we'll show some mock auction results
+        const wonAuctions = [];
+        const lostAuctions = [];
+
+        return `
+        <div class="page-header">
+            <div class="container">
+                <h1>iWon / iLost</h1>
+                <p class="lead">Your auction history</p>
+            </div>
+        </div>
+        <div class="container section">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+                <div class="card" style="text-align:center;padding:24px;background:rgba(5,150,105,0.05);border-color:var(--success);">
+                    <h2 style="color:var(--success);font-size:32px;margin-bottom:4px;">${wonAuctions.length}</h2>
+                    <p style="color:var(--slate-600);">Auctions Won</p>
+                </div>
+                <div class="card" style="text-align:center;padding:24px;background:rgba(220,38,38,0.05);border-color:var(--error);">
+                    <h2 style="color:var(--error);font-size:32px;margin-bottom:4px;">${lostAuctions.length}</h2>
+                    <p style="color:var(--slate-600);">Auctions Lost</p>
+                </div>
+            </div>
+
+            ${(wonAuctions.length || lostAuctions.length) ? `
+                <h3 style="margin-bottom:16px;">Recent Results</h3>
+                ${wonAuctions.map(a => `
+                    <div class="auction-result-card won">
+                        <div class="auction-result-content">
+                            <img src="${a.image}" alt="" class="auction-result-image">
+                            <div class="auction-result-info">
+                                <h4>${a.title}</h4>
+                                <div class="price">$${a.winningBid.toLocaleString()}</div>
+                                <span class="status won">Won!</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+                ${lostAuctions.map(a => `
+                    <div class="auction-result-card lost">
+                        <div class="auction-result-content">
+                            <img src="${a.image}" alt="" class="auction-result-image">
+                            <div class="auction-result-info">
+                                <h4>${a.title}</h4>
+                                <div class="price">$${a.winningBid.toLocaleString()}</div>
+                                <span class="status lost">Outbid</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            ` : `
+                <div class="empty-state">
+                    <div class="empty-state-icon">🏆</div>
+                    <h3>No auction history yet</h3>
+                    <p>Start bidding on auctions to see your results here</p>
+                    <button class="btn btn-primary" onclick="App.filters.saleType='auction';App.navigate('browse')">Find Auctions</button>
+                </div>
+            `}
+        </div>`;
+    },
+
+    renderReviews() {
+        if (!this.currentUser) { openModal('login'); return ''; }
+        // Mock reviews data
+        const reviews = [];
+        const userRating = 0;
+        const totalReviews = 0;
+
+        return `
+        <div class="page-header">
+            <div class="container">
+                <h1>iRate</h1>
+                <p class="lead">Your ratings and reviews</p>
+            </div>
+        </div>
+        <div class="container section">
+            <div class="card" style="margin-bottom:24px;">
+                <div class="card-body" style="text-align:center;padding:32px;">
+                    <h2 style="font-size:48px;color:var(--warning);margin-bottom:8px;">
+                        ${userRating > 0 ? userRating.toFixed(1) : '-'}
+                    </h2>
+                    <div class="rating-stars" style="justify-content:center;margin-bottom:8px;">
+                        ${[1,2,3,4,5].map(s => `<span class="rating-star ${s <= userRating ? 'active' : ''}">★</span>`).join('')}
+                    </div>
+                    <p style="color:var(--slate-500);">${totalReviews} review${totalReviews !== 1 ? 's' : ''}</p>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom:16px;">Reviews from Buyers</h3>
+
+            ${reviews.length ? reviews.map(r => `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-user">
+                            <div class="review-avatar">${r.buyerName[0].toUpperCase()}</div>
+                            <div class="review-meta">
+                                <h4>${r.buyerName}</h4>
+                                <p>${App.timeAgo(r.createdAt)}</p>
+                            </div>
+                        </div>
+                        <div class="rating-stars">
+                            ${[1,2,3,4,5].map(s => `<span class="rating-star ${s <= r.rating ? 'active' : ''}" style="font-size:16px;">★</span>`).join('')}
+                        </div>
+                    </div>
+                    <p class="review-content">${r.comment}</p>
+                </div>
+            `).join('') : `
+                <div class="empty-state">
+                    <div class="empty-state-icon">⭐</div>
+                    <h3>No reviews yet</h3>
+                    <p>Complete some sales to start receiving reviews from buyers</p>
+                    <button class="btn btn-primary" onclick="App.navigate('create')">Create a Listing</button>
+                </div>
+            `}
         </div>`;
     },
 
@@ -1956,59 +2335,119 @@ const App = {
 
     renderCreateListing() {
         if (!this.currentUser) { openModal('login'); return ''; }
-        return `
-        <div class="page-header"><div class="container"><h1>Create Listing</h1><p class="lead">List your item for free</p></div></div>
-        <div class="container" style="max-width:700px;padding:40px 24px 80px;">
-            <div class="card"><div class="card-body">
-                <form onsubmit="createListing(event)">
-                    <div class="form-group">
-                        <label class="form-label">Listing Type</label>
-                        <select class="form-input form-select" id="listingType" onchange="toggleListingFields()">
-                            <option value="general">General Item</option>
-                            <option value="vehicle">Vehicle</option>
-                            <option value="property">Property</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Title *</label>
-                        <input type="text" class="form-input" id="listingTitle" placeholder="e.g. iPhone 15 Pro Max - Excellent Condition" required>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">Category</label>
-                            <select class="form-input form-select" id="listingCat">
-                                ${this.categoryGroups.map(g => `
-                                    <optgroup label="${g.name}">
-                                        ${this.categories.filter(c => c.group === g.id).map(c =>
-                                            `<option value="${c.id}">${c.name}</option>`
-                                        ).join('')}
-                                    </optgroup>
-                                `).join('')}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Sale Type</label>
-                            <select class="form-input form-select" id="listingSaleType" onchange="toggleAuctionFields()">
-                                <option value="buynow">Buy Now (Fixed Price)</option>
-                                <option value="auction">Auction</option>
-                            </select>
-                        </div>
-                    </div>
 
-                    <div class="form-row">
+        // Get selected listing type from App state (default to null for type selector)
+        const listingType = App.selectedListingType || null;
+
+        // If no type selected, show type selector
+        if (!listingType) {
+            return `
+            <div class="page-header">
+                <div class="container">
+                    <h1>iSell - Create Listing</h1>
+                    <p class="lead">What would you like to sell?</p>
+                </div>
+            </div>
+            <div class="container" style="max-width:800px;padding:40px 24px 80px;">
+                <div class="listing-type-selector">
+                    <div class="listing-type-card" onclick="App.selectedListingType='item';App.render();">
+                        <div class="icon">📦</div>
+                        <h4>Item for sale</h4>
+                        <p>Electronics, furniture, clothing, and more</p>
+                    </div>
+                    <div class="listing-type-card" onclick="App.selectedListingType='vehicle';App.render();">
+                        <div class="icon">🚗</div>
+                        <h4>Vehicle for sale</h4>
+                        <p>Cars, motorcycles, boats, caravans</p>
+                    </div>
+                    <div class="listing-type-card" onclick="App.selectedListingType='property';App.render();">
+                        <div class="icon">🏠</div>
+                        <h4>Property for sale/rent</h4>
+                        <p>Houses, apartments, land, commercial</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // Render appropriate form based on type
+        if (listingType === 'item') {
+            return this.renderItemForm();
+        } else if (listingType === 'vehicle') {
+            return this.renderVehicleForm();
+        } else if (listingType === 'property') {
+            return this.renderPropertyForm();
+        }
+    },
+
+    renderItemForm() {
+        return `
+        <div class="page-header">
+            <div class="container">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="btn btn-ghost" onclick="App.selectedListingType=null;App.render();">← Back</button>
+                    <div>
+                        <h1>Item for sale</h1>
+                        <p class="lead">List your item on iSQROLL</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="max-width:700px;padding:24px 16px 100px;">
+            <form onsubmit="createListing(event)" id="itemForm">
+                <input type="hidden" id="listingType" value="general">
+
+                <!-- Photos Section -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Photos <span style="color:var(--slate-400);font-weight:normal;">0/20</span></h3>
+                    <p class="form-hint" style="margin-bottom:16px;">You can add up to 20 photos.</p>
+                    <div class="photo-upload-area">
+                        <div class="icon">🖼️</div>
+                        <h4>Add Photos</h4>
+                        <p>Tap to select photos or drag and drop</p>
+                    </div>
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label">Or paste image URL</label>
+                        <input type="url" class="form-input" id="listingImage" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Sale Type -->
+                <div class="form-section">
+                    <h3 class="form-section-title">How would you like to sell?</h3>
+                    <div class="sale-type-options">
+                        <div class="sale-type-option active" onclick="selectSaleType('enquire',this)">
+                            <h5>Enquire</h5>
+                            <p>Let buyers contact you</p>
+                        </div>
+                        <div class="sale-type-option" onclick="selectSaleType('auction',this)">
+                            <h5>Auction</h5>
+                            <p>Accept bids</p>
+                        </div>
+                        <div class="sale-type-option" onclick="selectSaleType('buynow',this)">
+                            <h5>Fixed Price</h5>
+                            <p>Set your price</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="listingSaleType" value="enquire">
+
+                    <div id="priceFields" style="display:none;margin-top:16px;">
                         <div class="form-group">
-                            <label class="form-label" id="priceLabel">Price ($)</label>
+                            <label class="form-label">Price (NZ$) <span class="form-required">*</span></label>
                             <input type="number" class="form-input" id="listingPrice" placeholder="0">
                         </div>
-                        <div class="form-group" id="auctionReserveGroup" style="display:none;">
-                            <label class="form-label">Reserve Price ($) <span style="color:#6B7280;font-weight:normal;">(optional)</span></label>
-                            <input type="number" class="form-input" id="listingReserve" placeholder="Minimum acceptable price">
-                        </div>
                     </div>
 
-                    <div id="auctionDurationGroup" style="display:none;">
+                    <div id="auctionFields" style="display:none;margin-top:16px;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Starting Bid (NZ$)</label>
+                                <input type="number" class="form-input" id="listingStartBid" placeholder="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Reserve Price (optional)</label>
+                                <input type="number" class="form-input" id="listingReserve" placeholder="Minimum price">
+                            </div>
+                        </div>
                         <div class="form-group">
                             <label class="form-label">Auction Duration</label>
                             <select class="form-input form-select" id="listingAuctionDuration">
@@ -2020,61 +2459,677 @@ const App = {
                         </div>
                     </div>
 
-                    <p style="font-size:12px;color:#6B7280;margin:-8px 0 16px;padding:10px;background:#f9fafb;border-radius:6px;">
-                        Listings are active for up to <strong>90 days</strong>. Auctions end after the selected duration.
-                    </p>
-                    
-                    <!-- Vehicle-specific fields -->
-                    <div id="vehicleFields" style="display:none;">
-                        <h4 style="margin:24px 0 16px;">Vehicle Details</h4>
-                        <div class="form-row">
-                            <div class="form-group"><label class="form-label">Make</label><input type="text" class="form-input" id="vehicleMake" placeholder="e.g. Toyota"></div>
-                            <div class="form-group"><label class="form-label">Model</label><input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Corolla"></div>
+                    <label class="toggle-label" style="margin-top:16px;">
+                        <span>Allow buyers to make an offer</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="allowOffers" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+
+                <!-- Item Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Item Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Title <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" id="listingTitle" placeholder="What are you selling?" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Category <span class="form-required">*</span></label>
+                            <select class="form-input form-select" id="listingCat" required>
+                                <option value="">Select</option>
+                                ${this.categoryGroups.map(g => `
+                                    <optgroup label="${g.name}">
+                                        ${this.categories.filter(c => c.group === g.id).map(c =>
+                                            `<option value="${c.id}">${c.name}</option>`
+                                        ).join('')}
+                                    </optgroup>
+                                `).join('')}
+                            </select>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group"><label class="form-label">Year</label><input type="number" class="form-input" id="vehicleYear" placeholder="2020"></div>
-                            <div class="form-group"><label class="form-label">Odometer (km)</label><input type="number" class="form-input" id="vehicleOdo" placeholder="50000"></div>
+                        <div class="form-group">
+                            <label class="form-label">Condition</label>
+                            <select class="form-input form-select" id="listingCondition">
+                                <option value="new">New</option>
+                                <option value="like-new">Like New</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                            </select>
                         </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Make (optional)</label>
+                            <input type="text" class="form-input" id="itemMake" placeholder="e.g. Apple">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model (optional)</label>
+                            <input type="text" class="form-input" id="itemModel" placeholder="e.g. iPhone 15">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description <span class="form-required">*</span></label>
+                        <textarea class="form-input form-textarea" id="listingDesc" placeholder="Describe your item in detail..." required style="min-height:150px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Location & Delivery -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Location & Delivery</h3>
+                    <div class="form-group">
+                        <label class="form-label">Location <span class="form-required">*</span></label>
+                        <select class="form-input form-select" id="listingLoc" required>
+                            ${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Payment Options</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="payment" value="cash" checked> Cash
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="payment" value="bank"> Bank Transfer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Shipping</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="shipping" value="pickup" checked> Pickup
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="shipping" value="delivery"> Delivery available
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Preferences -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Preferences</h3>
+                    <label class="toggle-label">
+                        <span>Show my phone number in listing</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showPhone">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+
+                <p style="font-size:12px;color:var(--slate-500);margin-bottom:16px;padding:12px;background:var(--slate-100);border-radius:8px;">
+                    💡 <strong>Tip:</strong> iSQROLL's busiest time is 7:00-10:00 pm, every day except Saturday.
+                </p>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Submit Listing</button>
+            </form>
+        </div>`;
+    },
+
+    renderVehicleForm() {
+        return `
+        <div class="page-header">
+            <div class="container">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="btn btn-ghost" onclick="App.selectedListingType=null;App.render();">← Back</button>
+                    <div>
+                        <h1>Vehicle for sale</h1>
+                        <p class="lead">List your vehicle on iSQROLL</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="max-width:700px;padding:24px 16px 100px;">
+            <form onsubmit="createListing(event)" id="vehicleForm">
+                <input type="hidden" id="listingType" value="vehicle">
+
+                <!-- Photos Section -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Photos <span style="color:var(--slate-400);font-weight:normal;">0/20</span></h3>
+                    <p class="form-hint" style="margin-bottom:16px;">You can add up to 20 photos.</p>
+                    <div class="photo-upload-area">
+                        <div class="icon">📷</div>
+                        <h4>Add Photos</h4>
+                        <p>Tap to select photos or drag and drop</p>
+                    </div>
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label">Or paste image URL</label>
+                        <input type="url" class="form-input" id="listingImage" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Vehicle Lookup -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Vehicle Lookup</h3>
+                    <p class="form-hint" style="margin-bottom:16px;">Enter plate or VIN to auto-fill details, or enter manually below.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Number Plate / VIN</label>
+                            <input type="text" class="form-input" id="vehiclePlate" placeholder="ABC123 or VIN">
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;">
+                            <button type="button" class="btn btn-secondary" onclick="showToast('VIN lookup coming soon!')">Lookup</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vehicle Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Vehicle Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Make <span class="form-required">*</span></label>
+                            <input type="text" class="form-input" id="vehicleMake" placeholder="e.g. Toyota" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Model <span class="form-required">*</span></label>
+                            <input type="text" class="form-input" id="vehicleModel" placeholder="e.g. Corolla" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Year <span class="form-required">*</span></label>
+                            <input type="number" class="form-input" id="vehicleYear" placeholder="2020" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Body Style <span class="form-required">*</span></label>
+                            <select class="form-input form-select" id="vehicleBody" required>
+                                <option value="">Select</option>
+                                <option>Sedan</option>
+                                <option>Hatchback</option>
+                                <option>SUV</option>
+                                <option>Ute</option>
+                                <option>Wagon</option>
+                                <option>Van</option>
+                                <option>Coupe</option>
+                                <option>Convertible</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Kilometers</label>
+                            <input type="number" class="form-input" id="vehicleKm" placeholder="50000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Colour</label>
+                            <input type="text" class="form-input" id="vehicleColour" placeholder="White">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Transmission</label>
+                            <select class="form-input form-select" id="vehicleTrans">
+                                <option>Automatic</option>
+                                <option>Manual</option>
+                                <option>CVT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fuel Type</label>
+                            <select class="form-input form-select" id="vehicleFuel">
+                                <option>Petrol</option>
+                                <option>Diesel</option>
+                                <option>Hybrid</option>
+                                <option>Electric</option>
+                                <option>LPG</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Engine Size (cc)</label>
+                            <input type="number" class="form-input" id="vehicleEngine" placeholder="2000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cylinders</label>
+                            <input type="number" class="form-input" id="vehicleCylinders" placeholder="4">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Seats</label>
+                            <input type="number" class="form-input" id="vehicleSeats" placeholder="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Doors</label>
+                            <input type="number" class="form-input" id="vehicleDoors" placeholder="4">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">WoF Expiry</label>
+                            <input type="date" class="form-input" id="vehicleWof">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Rego Expiry</label>
+                            <input type="date" class="form-input" id="vehicleRego">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Reported Stolen?</label>
+                            <select class="form-input form-select" id="vehicleStolen">
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Imported Damaged?</label>
+                            <select class="form-input form-select" id="vehicleDamaged">
+                                <option value="no">No</option>
+                                <option value="yes">Yes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Are on-road costs included?</label>
+                        <div style="display:flex;gap:16px;margin-top:8px;">
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                <input type="radio" name="onRoadCosts" value="yes"> Yes
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                <input type="radio" name="onRoadCosts" value="no" checked> No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Listing Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Listing Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Title <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" id="listingTitle" placeholder="e.g. 2020 Toyota Corolla GX - Low KMs" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Category <span class="form-required">*</span></label>
+                        <select class="form-input form-select" id="listingCat" required>
+                            ${this.categories.filter(c => c.group === 'automotive').map(c =>
+                                `<option value="${c.id}">${c.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Condition <span class="form-required">*</span></label>
+                        <select class="form-input form-select" id="listingCondition" required>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description <span class="form-required">*</span></label>
+                        <textarea class="form-input form-textarea" id="listingDesc" placeholder="Describe your vehicle in detail..." required style="min-height:150px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Sale Type -->
+                <div class="form-section">
+                    <h3 class="form-section-title">How would you like to sell?</h3>
+                    <div class="sale-type-options">
+                        <div class="sale-type-option" onclick="selectSaleType('enquire',this)">
+                            <h5>Enquire</h5>
+                            <p>Price on application</p>
+                        </div>
+                        <div class="sale-type-option active" onclick="selectSaleType('buynow',this)">
+                            <h5>Asking Price</h5>
+                            <p>Set your price</p>
+                        </div>
+                        <div class="sale-type-option" onclick="selectSaleType('auction',this)">
+                            <h5>Auction</h5>
+                            <p>Run an auction</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="listingSaleType" value="buynow">
+
+                    <div id="priceFields" style="margin-top:16px;">
+                        <div class="form-group">
+                            <label class="form-label">Asking Price (NZ$) <span class="form-required">*</span></label>
+                            <input type="number" class="form-input" id="listingPrice" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div id="auctionFields" style="display:none;margin-top:16px;">
                         <div class="form-row">
-                            <div class="form-group"><label class="form-label">Colour</label><input type="text" class="form-input" id="vehicleColour" placeholder="White"></div>
-                            <div class="form-group"><label class="form-label">Transmission</label>
-                                <select class="form-input form-select" id="vehicleTrans"><option>Manual</option><option>Automatic</option></select>
+                            <div class="form-group">
+                                <label class="form-label">Starting Bid (NZ$)</label>
+                                <input type="number" class="form-input" id="listingStartBid" placeholder="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Reserve Price (optional)</label>
+                                <input type="number" class="form-input" id="listingReserve" placeholder="Minimum price">
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Property-specific fields -->
-                    <div id="propertyFields" style="display:none;">
-                        <h4 style="margin:24px 0 16px;">Property Details</h4>
-                        <div class="form-row">
-                            <div class="form-group"><label class="form-label">Bedrooms</label><input type="number" class="form-input" id="propBeds" placeholder="3"></div>
-                            <div class="form-group"><label class="form-label">Bathrooms</label><input type="number" class="form-input" id="propBaths" placeholder="1"></div>
+
+                    <label class="toggle-label" style="margin-top:16px;">
+                        <span>Allow buyers to make an offer</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="allowOffers" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+
+                <!-- Location -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Location & Delivery</h3>
+                    <div class="form-group">
+                        <label class="form-label">Location <span class="form-required">*</span></label>
+                        <select class="form-input form-select" id="listingLoc" required>
+                            ${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Delivery Options</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="shipping" value="pickup" checked> Pickup
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--white);border:1px solid var(--slate-200);border-radius:6px;cursor:pointer;">
+                                <input type="checkbox" name="shipping" value="arranged"> To be arranged
+                            </label>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group"><label class="form-label">Land Area (m²)</label><input type="number" class="form-input" id="propLand" placeholder="650"></div>
-                            <div class="form-group"><label class="form-label">Floor Area (m²)</label><input type="number" class="form-input" id="propFloor" placeholder="120"></div>
-                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea class="form-input form-textarea" id="listingDesc" placeholder="Describe your item..."></textarea>
+                </div>
+
+                <!-- Contact Preferences -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Preferences</h3>
+                    <label class="toggle-label">
+                        <span>Show my phone number in listing</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showPhone">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+
+                <p style="font-size:12px;color:var(--slate-500);margin-bottom:16px;padding:12px;background:var(--slate-100);border-radius:8px;">
+                    💡 <strong>Tip:</strong> iSQROLL's busiest time is 7:00-10:00 pm, every day except Saturday.
+                </p>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Submit Listing</button>
+            </form>
+        </div>`;
+    },
+
+    renderPropertyForm() {
+        return `
+        <div class="page-header">
+            <div class="container">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="btn btn-ghost" onclick="App.selectedListingType=null;App.render();">← Back</button>
+                    <div>
+                        <h1>Property for sale/rent</h1>
+                        <p class="lead">List your property on iSQROLL</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Location</label>
-                        <select class="form-input form-select" id="listingLoc">${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}</select>
+                </div>
+            </div>
+        </div>
+        <div class="container" style="max-width:700px;padding:24px 16px 100px;">
+            <form onsubmit="createListing(event)" id="propertyForm">
+                <input type="hidden" id="listingType" value="property">
+
+                <!-- Photos Section -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Photos <span style="color:var(--slate-400);font-weight:normal;">0/20</span></h3>
+                    <p class="form-hint" style="margin-bottom:16px;">You can add up to 20 photos.</p>
+                    <div class="photo-upload-area">
+                        <div class="icon">🏠</div>
+                        <h4>Add Photos</h4>
+                        <p>Tap to select photos or drag and drop</p>
                     </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Image URL</label>
+                    <div class="form-group" style="margin-top:16px;">
+                        <label class="form-label">Or paste image URL</label>
                         <input type="url" class="form-input" id="listingImage" placeholder="https://...">
-                        <p class="text-sm text-muted" style="margin-top:4px;">Paste an image URL. Image upload coming soon!</p>
                     </div>
-                    
-                    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Publish Listing</button>
-                </form>
-            </div></div>
+                    <div class="form-group">
+                        <label class="form-label">YouTube Video (optional)</label>
+                        <input type="url" class="form-input" id="propertyVideo" placeholder="https://youtube.com/...">
+                        <p class="form-hint">Please ensure advertising features are disabled.</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">3D Tour URL (optional)</label>
+                        <input type="url" class="form-input" id="property3DTour" placeholder="https://...">
+                    </div>
+                </div>
+
+                <!-- Property Details -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Property Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Title <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" id="listingTitle" placeholder="e.g. Beautiful 3 Bedroom Home in Ponsonby" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Category <span class="form-required">*</span></label>
+                            <select class="form-input form-select" id="listingCat" required>
+                                ${this.categories.filter(c => c.group === 'property').map(c =>
+                                    `<option value="${c.id}">${c.name}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Listing Type</label>
+                            <select class="form-input form-select" id="propertyType">
+                                <option value="sale">For Sale</option>
+                                <option value="rent">For Rent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">About this property <span class="form-required">*</span></label>
+                        <textarea class="form-input form-textarea" id="listingDesc" placeholder="Describe the property..." required style="min-height:150px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Property Address</h3>
+                    <p class="form-hint" style="margin-bottom:16px;">Enter the full address so we can display a map on your listing.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Street # <span class="form-required">*</span></label>
+                            <input type="text" class="form-input" id="propStreetNum" placeholder="123" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Unit / Flat</label>
+                            <input type="text" class="form-input" id="propUnit" placeholder="1A">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Street Name <span class="form-required">*</span></label>
+                        <input type="text" class="form-input" id="propStreet" placeholder="Main Street" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Region <span class="form-required">*</span></label>
+                        <select class="form-input form-select" id="listingLoc" required>
+                            ${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">District</label>
+                            <input type="text" class="form-input" id="propDistrict" placeholder="District">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Suburb</label>
+                            <input type="text" class="form-input" id="propSuburb" placeholder="Suburb">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Features</h3>
+                    <p class="form-hint" style="margin-bottom:16px;">Provide details about features that make the property stand out.</p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Bedrooms</label>
+                            <input type="number" class="form-input" id="propBeds" placeholder="3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Bathrooms</label>
+                            <input type="number" class="form-input" id="propBaths" placeholder="1">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Separate Toilets</label>
+                            <input type="number" class="form-input" id="propToilets" placeholder="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ensuite Bathrooms</label>
+                            <input type="number" class="form-input" id="propEnsuites" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Living Areas / Lounges</label>
+                            <input type="number" class="form-input" id="propLounges" placeholder="1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Studies</label>
+                            <input type="number" class="form-input" id="propStudies" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Land Area (m²)</label>
+                            <input type="number" class="form-input" id="propLand" placeholder="650">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Floor Area (m²)</label>
+                            <input type="number" class="form-input" id="propFloor" placeholder="120">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Parking -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Parking</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Garage Parking</label>
+                            <select class="form-input form-select" id="propGarage">
+                                <option value="">None</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3+</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Off-street Parking</label>
+                            <select class="form-input form-select" id="propParking">
+                                <option value="">None</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3+</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Additional Parking Details (optional)</label>
+                        <textarea class="form-input" id="propParkingDetails" placeholder="Describe parking options..." style="min-height:80px;"></textarea>
+                    </div>
+                </div>
+
+                <!-- Price -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Price</h3>
+                    <div class="form-group">
+                        <label class="form-label">Asking Price (NZ$)</label>
+                        <input type="number" class="form-input" id="listingPrice" placeholder="0">
+                    </div>
+                    <label class="toggle-label">
+                        <span>Allow buyers to enquire for price or negotiation</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="priceEnquiry" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                    <input type="hidden" id="listingSaleType" value="buynow">
+                </div>
+
+                <!-- Rental Details (shown if For Rent) -->
+                <div class="form-section" id="rentalSection" style="display:none;">
+                    <h3 class="form-section-title">Rental Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Pets OK?</label>
+                            <select class="form-input form-select" id="propPets">
+                                <option value="">Select</option>
+                                <option>Yes</option>
+                                <option>No</option>
+                                <option>Negotiable</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Smokers OK?</label>
+                            <select class="form-input form-select" id="propSmokers">
+                                <option value="">Select</option>
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Furnishings & Whiteware</label>
+                        <textarea class="form-input" id="propFurnishings" placeholder="List any included furnishings..." style="min-height:80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Ideal Tenants</label>
+                        <textarea class="form-input" id="propIdealTenants" placeholder="Describe your ideal tenants..." style="min-height:80px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Available From</label>
+                        <input type="date" class="form-input" id="propAvailableDate">
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="form-section">
+                    <h3 class="form-section-title">Contact Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Mobile (optional)</label>
+                            <input type="tel" class="form-input" id="propMobile" placeholder="027 123 4567">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Home (optional)</label>
+                            <input type="tel" class="form-input" id="propHome" placeholder="09 123 4567">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Best Contact Time (optional)</label>
+                        <input type="text" class="form-input" id="propContactTime" placeholder="e.g. Evenings after 5pm">
+                    </div>
+                    <label class="toggle-label" style="margin-top:16px;">
+                        <span>Show my phone number in ads</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="showPhone">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Submit Listing</button>
+            </form>
+
+            <script>
+                document.getElementById('propertyType')?.addEventListener('change', function() {
+                    document.getElementById('rentalSection').style.display = this.value === 'rent' ? 'block' : 'none';
+                });
+            </script>
         </div>`;
     }
 };
@@ -2116,6 +3171,22 @@ function toggleSubscriptionTier() {
     if (tierGroup) {
         tierGroup.style.display = accountType === 'seller' ? 'block' : 'none';
     }
+}
+
+function selectSaleType(type, element) {
+    // Update hidden input
+    document.getElementById('listingSaleType').value = type;
+
+    // Update visual state
+    document.querySelectorAll('.sale-type-option').forEach(opt => opt.classList.remove('active'));
+    element.classList.add('active');
+
+    // Show/hide price and auction fields
+    const priceFields = document.getElementById('priceFields');
+    const auctionFields = document.getElementById('auctionFields');
+
+    if (priceFields) priceFields.style.display = type === 'buynow' ? 'block' : 'none';
+    if (auctionFields) auctionFields.style.display = type === 'auction' ? 'block' : 'none';
 }
 
 // ============================================
