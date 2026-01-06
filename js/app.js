@@ -2,6 +2,195 @@
 // iSQROLL - Main Application
 // ============================================
 
+// ============================================
+// COMPONENTS (Header & Footer managed separately)
+// ============================================
+
+const Components = {
+    header() {
+        const user = App.currentUser;
+        const initial = user ? (user.displayName || user.email)[0].toUpperCase() : '';
+        
+        return `
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo" onclick="App.navigate('home')">
+                    <div class="logo-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                    </div>
+                    i<span class="accent">SQROLL</span>
+                </div>
+                <div class="header-search">
+                    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Search for anything..." id="headerSearch" onkeyup="if(event.key==='Enter'){App.searchQuery=this.value;App.navigate('browse');}">
+                </div>
+                <nav class="nav-main">
+                    <span class="nav-link" onclick="App.navigate('browse')">Browse</span>
+                    <span class="nav-link" onclick="App.navigate('categories')">Categories</span>
+                    <span class="nav-link" onclick="App.navigate('how-it-works')">How it Works</span>
+                    <span class="nav-link" onclick="App.navigate('about')">About</span>
+                </nav>
+                <div class="header-actions">
+                    ${user ? `
+                        <button class="btn btn-secondary" onclick="App.navigate('create')">+ Sell</button>
+                        <div class="user-menu">
+                            <div class="user-avatar" onclick="toggleDropdown()">${initial}</div>
+                            <div class="user-dropdown" id="userDropdown">
+                                <div class="dropdown-header">
+                                    <div class="dropdown-name">${user.displayName || 'User'}</div>
+                                    <div class="dropdown-email">${user.email}</div>
+                                </div>
+                                <div class="dropdown-item" onclick="App.navigate('profile')">👤 Profile</div>
+                                <div class="dropdown-item" onclick="App.navigate('my-listings')">📦 My Listings</div>
+                                <div class="dropdown-item" onclick="App.navigate('saved')">❤️ Saved</div>
+                                <div class="dropdown-item danger" onclick="App.logout()">🚪 Log Out</div>
+                            </div>
+                        </div>
+                    ` : `
+                        <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+                        <button class="btn btn-primary" onclick="openModal('signup')">Sign up</button>
+                    `}
+                </div>
+                <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><span></span><span></span><span></span></button>
+            </div>
+            <nav class="mobile-nav" id="mobileNav">
+                <span class="nav-link" onclick="App.navigate('browse');toggleMobileMenu();">Browse</span>
+                <span class="nav-link" onclick="App.navigate('categories');toggleMobileMenu();">Categories</span>
+                <span class="nav-link" onclick="App.navigate('how-it-works');toggleMobileMenu();">How it Works</span>
+                <span class="nav-link" onclick="App.navigate('about');toggleMobileMenu();">About</span>
+                <div class="mobile-nav-actions">
+                    ${user ? `
+                        <button class="btn btn-secondary" onclick="App.navigate('profile');toggleMobileMenu();">Profile</button>
+                        <button class="btn btn-primary" onclick="App.navigate('create');toggleMobileMenu();">Sell</button>
+                    ` : `
+                        <button class="btn btn-secondary" onclick="openModal('login');toggleMobileMenu();">Log in</button>
+                        <button class="btn btn-primary" onclick="openModal('signup');toggleMobileMenu();">Sign up</button>
+                    `}
+                </div>
+            </nav>
+        </header>`;
+    },
+
+    footer() {
+        return `
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-brand">
+                        <div class="logo" onclick="App.navigate('home')">
+                            <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></div>
+                            i<span class="accent">SQROLL</span>
+                        </div>
+                        <p>A marketplace for the people. Buy and sell with Kiwis you can trust. Safe, simple, and community-focused.</p>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">Marketplace</h4>
+                        <ul class="footer-links">
+                            <li><a onclick="App.navigate('browse')">Browse Listings</a></li>
+                            <li><a onclick="App.navigate('categories')">Categories</a></li>
+                            <li><a onclick="App.navigate('how-it-works')">How it Works</a></li>
+                            <li><a onclick="App.navigate('seller-guide')">Seller Guide</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">Categories</h4>
+                        <ul class="footer-links">
+                            <li><a onclick="App.searchCategory='electronics';App.navigate('browse')">Electronics</a></li>
+                            <li><a onclick="App.searchCategory='clothing';App.navigate('browse')">Clothing</a></li>
+                            <li><a onclick="App.searchCategory='home';App.navigate('browse')">Home & Living</a></li>
+                            <li><a onclick="App.searchCategory='vehicles';App.navigate('browse')">Vehicles</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="footer-title">Company</h4>
+                        <ul class="footer-links">
+                            <li><a onclick="App.navigate('about')">About Us</a></li>
+                            <li><a onclick="App.navigate('contact')">Contact</a></li>
+                            <li><a onclick="App.navigate('privacy')">Privacy Policy</a></li>
+                            <li><a onclick="App.navigate('terms')">Terms of Use</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <div>&copy; 2026 iSQROLL Limited. All rights reserved.</div>
+                    <div class="powered-by">Powered by <a href="https://sidequestdigital.co.nz" target="_blank">Sidequest Digital</a></div>
+                </div>
+            </div>
+        </footer>`;
+    },
+
+    modals() {
+        return `
+        <!-- Login Modal -->
+        <div class="modal-overlay" id="loginModal" onclick="if(event.target===this)closeModal('login')">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Log in</h3>
+                    <button class="modal-close" onclick="closeModal('login')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="demo-box">
+                        <div class="demo-box-title">🔑 Demo Account</div>
+                        <p>Email: <code>demo@isqroll.co.nz</code></p>
+                        <p>Password: <code>demo123</code></p>
+                    </div>
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="loginEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="loginPassword" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Log in</button>
+                    </form>
+                    <div class="modal-footer-text">
+                        Don't have an account? <a onclick="closeModal('login');setTimeout(()=>openModal('signup'),200)">Sign up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Modal -->
+        <div class="modal-overlay" id="signupModal" onclick="if(event.target===this)closeModal('signup')">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Create account</h3>
+                    <button class="modal-close" onclick="closeModal('signup')">✕</button>
+                </div>
+                <div class="modal-body">
+                    <form onsubmit="handleSignup(event)">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="signupName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="signupEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="signupPassword" required minlength="6">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Create account</button>
+                    </form>
+                    <div class="modal-footer-text">
+                        Already have an account? <a onclick="closeModal('signup');setTimeout(()=>openModal('login'),200)">Log in</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast -->
+        <div class="toast" id="toast"><span id="toastMsg"></span></div>`;
+    }
+};
+
+// ============================================
+// MAIN APP
+// ============================================
+
 const App = {
     currentUser: null,
     listings: [],
@@ -14,15 +203,31 @@ const App = {
 
     async init() {
         console.log('🚀 Initializing iSQROLL...');
+        
+        // Render shell (header, app container, footer, modals)
+        this.renderShell();
+        
         auth.onAuthStateChanged(user => {
             this.currentUser = user;
-            this.updateAuthUI();
+            this.renderShell();
             this.renderPage();
         });
+        
         await this.loadCategories();
         await this.loadListings();
         this.handleRoute();
         window.addEventListener('popstate', () => this.handleRoute());
+        
+        console.log('✅ App ready');
+    },
+
+    renderShell() {
+        document.body.innerHTML = `
+            ${Components.header()}
+            <main id="app"></main>
+            ${Components.footer()}
+            ${Components.modals()}
+        `;
     },
 
     async loadCategories() {
@@ -37,12 +242,12 @@ const App = {
         try {
             const snap = await db.collection('listings').where('status', '==', 'active').limit(50).get();
             this.listings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            // Sort client-side instead (avoids needing Firestore composite index)
             this.listings.sort((a, b) => {
                 const aTime = a.createdAt?.toDate?.() || new Date(0);
                 const bTime = b.createdAt?.toDate?.() || new Date(0);
                 return bTime - aTime;
             });
+            console.log(`📦 Loaded ${this.listings.length} listings`);
         } catch (e) { console.error('Load error:', e); this.listings = []; }
     },
 
@@ -65,38 +270,25 @@ const App = {
     renderPage() {
         const app = document.getElementById('app');
         if (!app) return;
+        
         const pages = {
-            home: () => this.renderHome(),
-            browse: () => this.renderBrowse(),
-            categories: () => this.renderCategories(),
-            listing: () => this.renderListingDetail(),
-            profile: () => this.renderProfile(),
+            'home': () => this.renderHome(),
+            'browse': () => this.renderBrowse(),
+            'categories': () => this.renderCategories(),
+            'listing': () => this.renderListingDetail(),
+            'profile': () => this.renderProfile(),
             'my-listings': () => this.renderMyListings(),
-            saved: () => this.renderSaved(),
-            create: () => this.renderCreateListing(),
-            about: () => this.renderAbout(),
-            'how-it-works': () => this.renderHowItWorks()
+            'saved': () => this.renderSaved(),
+            'create': () => this.renderCreateListing(),
+            'about': () => Pages.about(),
+            'how-it-works': () => Pages.howItWorks(),
+            'seller-guide': () => Pages.sellerGuide(),
+            'contact': () => Pages.contact(),
+            'privacy': () => Pages.privacy(),
+            'terms': () => Pages.terms()
         };
+        
         app.innerHTML = (pages[this.currentPage] || pages.home)();
-    },
-
-    updateAuthUI() {
-        const nav = document.getElementById('headerActions');
-        if (!nav) return;
-        if (this.currentUser) {
-            const i = (this.currentUser.displayName || this.currentUser.email)[0].toUpperCase();
-            nav.innerHTML = `<button class="btn btn-secondary" onclick="App.navigate('create')">+ Sell</button>
-                <div class="user-menu"><div class="user-avatar" onclick="toggleDropdown()">${i}</div>
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="dropdown-header"><div class="dropdown-name">${this.currentUser.displayName || 'User'}</div><div class="dropdown-email">${this.currentUser.email}</div></div>
-                    <div class="dropdown-item" onclick="App.navigate('profile')">👤 Profile</div>
-                    <div class="dropdown-item" onclick="App.navigate('my-listings')">📦 My Listings</div>
-                    <div class="dropdown-item" onclick="App.navigate('saved')">❤️ Saved</div>
-                    <div class="dropdown-item danger" onclick="App.logout()">🚪 Log Out</div>
-                </div></div>`;
-        } else {
-            nav.innerHTML = `<button class="btn btn-ghost" onclick="openModal('login')">Log in</button><button class="btn btn-primary" onclick="openModal('signup')">Sign up</button>`;
-        }
     },
 
     async login(email, pw) {
@@ -108,7 +300,7 @@ const App = {
         try {
             const c = await auth.createUserWithEmailAndPassword(email, pw);
             await c.user.updateProfile({ displayName: name });
-            closeModal('signup'); showToast('Welcome!');
+            closeModal('signup'); showToast('Welcome to iSQROLL!');
         } catch (e) { showToast(e.message, 'error'); }
     },
 
@@ -178,15 +370,15 @@ const App = {
         <section class="hero"><div class="container"><div class="hero-grid">
             <div class="hero-content">
                 <h1>Buy & sell with<br><span class="gradient-text">Kiwis you trust</span></h1>
-                <p class="lead">New Zealand's community marketplace. Find great deals and connect with real people.</p>
+                <p class="lead">New Zealand's community marketplace. A safe buying and selling environment with easy communication between traders.</p>
                 <div class="hero-actions">
-                    <button class="btn btn-primary btn-lg" onclick="${this.currentUser ? "App.navigate('create')" : "openModal('login')"}">+ Start Selling</button>
+                    <button class="btn btn-primary btn-lg" onclick="${this.currentUser ? "App.navigate('create')" : "openModal('signup')"}">+ Start Selling Free</button>
                     <button class="btn btn-secondary btn-lg" onclick="App.navigate('browse')">Explore</button>
                 </div>
                 <div class="hero-stats">
-                    <div class="hero-stat"><h3>${this.listings.length || '12K'}+</h3><p>Listings</p></div>
-                    <div class="hero-stat"><h3>8.5K</h3><p>Sellers</p></div>
-                    <div class="hero-stat"><h3>$2.4M</h3><p>Sold</p></div>
+                    <div class="hero-stat"><h3>3K+</h3><p>Listings</p></div>
+                    <div class="hero-stat"><h3>500+</h3><p>Sellers</p></div>
+                    <div class="hero-stat"><h3>100%</h3><p>Kiwi Owned</p></div>
                 </div>
             </div>
             <div class="hero-visual"><div class="hero-card">
@@ -209,21 +401,40 @@ const App = {
             <div class="listings-grid">${rec.map(l => this.renderCard(l)).join('')}</div>
         </div></section>` : `<section class="section"><div class="container">
             <div class="empty-state"><div class="empty-state-icon">📦</div><h3>No listings yet</h3><p>Seed the database with demo data!</p><button class="btn btn-primary" onclick="seedDatabase()">Seed Demo Data</button></div>
-        </div></section>`}`;
+        </div></section>`}
+        
+        <!-- Trust Section -->
+        <section class="section" style="background:var(--slate-900);color:var(--white);">
+            <div class="container" style="text-align:center;">
+                <h2 style="color:var(--white);margin-bottom:16px;">Why Kiwis Choose iSQROLL</h2>
+                <p style="color:var(--slate-400);max-width:600px;margin:0 auto 48px;">We believe businesses and individual buyers and sellers are important contributors to the economic health of New Zealand.</p>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px;">
+                    <div><div style="font-size:40px;margin-bottom:12px;">🛡️</div><h4 style="color:var(--white);margin-bottom:8px;">Verified Users</h4><p style="color:var(--slate-400);font-size:14px;">Be verified at no cost. No scammers, no fake accounts.</p></div>
+                    <div><div style="font-size:40px;margin-bottom:12px;">💬</div><h4 style="color:var(--white);margin-bottom:8px;">Easy Chat</h4><p style="color:var(--slate-400);font-size:14px;">Direct communication between buyers and sellers.</p></div>
+                    <div><div style="font-size:40px;margin-bottom:12px;">🆓</div><h4 style="color:var(--white);margin-bottom:8px;">Free to List</h4><p style="color:var(--slate-400);font-size:14px;">Affordable memberships starting from $0.</p></div>
+                    <div><div style="font-size:40px;margin-bottom:12px;">🇳🇿</div><h4 style="color:var(--white);margin-bottom:8px;">100% Kiwi</h4><p style="color:var(--slate-400);font-size:14px;">Designed for Kiwis, by Kiwis.</p></div>
+                </div>
+            </div>
+        </section>`;
     },
 
     renderBrowse() {
         const l = this.getFiltered();
+        const catName = this.searchCategory ? this.categories.find(c => c.id === this.searchCategory)?.name : '';
         return `${this.renderSearch()}<section class="section"><div class="container">
-            <div class="section-header"><h2>All Listings <span class="text-muted">(${l.length})</span></h2></div>
-            ${l.length ? `<div class="listings-grid">${l.map(x => this.renderCard(x)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No listings found</h3></div>`}
+            <div class="section-header"><h2>${catName || 'All Listings'} <span class="text-muted">(${l.length})</span></h2>
+            ${this.searchCategory ? `<button class="btn btn-ghost" onclick="App.searchCategory='';App.renderPage();">Clear filter ✕</button>` : ''}</div>
+            ${l.length ? `<div class="listings-grid">${l.map(x => this.renderCard(x)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>No listings found</h3><p>Try a different search or category</p></div>`}
         </div></section>`;
     },
 
     renderCategories() {
-        return `<div class="page-header"><div class="container"><h1>All Categories</h1><p class="lead">${this.categories.length} categories</p></div></div>
+        return `<div class="page-header"><div class="container"><h1>All Categories</h1><p class="lead">Explore ${this.categories.length} categories of goods and services</p></div></div>
         <section class="section"><div class="container"><div class="categories-grid" style="grid-template-columns:repeat(4,1fr);">
-            ${this.categories.map(c => `<div class="category-card" onclick="App.searchCategory='${c.id}';App.navigate('browse');"><div class="category-icon">${c.icon}</div><h4>${c.name}</h4></div>`).join('')}
+            ${this.categories.map(c => {
+                const count = this.listings.filter(l => l.category === c.id).length;
+                return `<div class="category-card" onclick="App.searchCategory='${c.id}';App.navigate('browse');"><div class="category-icon">${c.icon}</div><h4>${c.name}</h4><p class="text-muted text-sm">${count} listings</p></div>`;
+            }).join('')}
         </div></div></section>`;
     },
 
@@ -237,7 +448,7 @@ const App = {
             <div class="listing-detail-grid">
                 <div class="listing-gallery">
                     <div class="gallery-main"><img src="${l.images?.[0] || ''}" alt="${l.title}"></div>
-                    <div class="card" style="margin-top:24px;"><div class="card-header"><h3 class="card-title">Description</h3></div><div class="card-body"><div style="white-space:pre-line;color:var(--slate-600);">${l.description || 'No description'}</div></div></div>
+                    <div class="card" style="margin-top:24px;"><div class="card-header"><h3 class="card-title">Description</h3></div><div class="card-body"><div style="white-space:pre-line;color:var(--slate-600);">${l.description || 'No description provided.'}</div></div></div>
                 </div>
                 <div><div class="listing-info-card">
                     <div class="listing-info-header">
@@ -262,7 +473,7 @@ const App = {
                     <div class="seller-card">
                         <div class="seller-info">
                             <div class="seller-avatar">${(l.sellerName || 'S')[0]}</div>
-                            <div class="seller-details"><h4>${l.sellerName || 'Seller'} ${l.sellerVerified ? '✓' : ''}</h4><p>${l.location}</p>
+                            <div class="seller-details"><h4>${l.sellerName || 'Seller'} ${l.sellerVerified ? '<span style="color:var(--primary);">✓</span>' : ''}</h4><p>${l.location}</p>
                                 <div class="seller-stats"><span class="seller-rating">⭐ ${l.sellerRating || 0}</span><span class="seller-stat">(${l.sellerReviews || 0} reviews)</span></div>
                             </div>
                         </div>
@@ -288,7 +499,10 @@ const App = {
         <div class="container" style="padding:40px 0;"><div class="card" style="max-width:600px;"><div class="card-body" style="text-align:center;padding:40px;">
             <div class="profile-avatar" style="margin:0 auto 20px;">${(this.currentUser.displayName || this.currentUser.email)[0].toUpperCase()}</div>
             <h3>${this.currentUser.displayName || 'User'}</h3><p class="text-muted">${this.currentUser.email}</p>
-            <button class="btn btn-secondary" style="margin-top:20px;" onclick="App.logout()">Log Out</button>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+                <button class="btn btn-primary" onclick="App.navigate('create')">+ Create Listing</button>
+                <button class="btn btn-secondary" onclick="App.logout()">Log Out</button>
+            </div>
         </div></div></div>`;
     },
 
@@ -296,63 +510,90 @@ const App = {
         if (!this.currentUser) { openModal('login'); return ''; }
         const my = this.listings.filter(l => l.sellerId === this.currentUser.uid);
         return `<div class="page-header"><div class="container"><h1>My Listings</h1></div></div>
-        <div class="container section">${my.length ? `<div class="listings-grid">${my.map(l => this.renderCard(l)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">📦</div><h3>No listings yet</h3><button class="btn btn-primary" onclick="App.navigate('create')">Create Listing</button></div>`}</div>`;
+        <div class="container section">${my.length ? `<div class="listings-grid">${my.map(l => this.renderCard(l)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">📦</div><h3>No listings yet</h3><p>Start selling today - it's free!</p><button class="btn btn-primary" onclick="App.navigate('create')">Create Listing</button></div>`}</div>`;
     },
 
     renderSaved() {
         if (!this.currentUser) { openModal('login'); return ''; }
         const sv = this.listings.filter(l => this.savedItems.includes(l.id));
         return `<div class="page-header"><div class="container"><h1>Saved Items</h1></div></div>
-        <div class="container section">${sv.length ? `<div class="listings-grid">${sv.map(l => this.renderCard(l)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">❤️</div><h3>No saved items</h3></div>`}</div>`;
+        <div class="container section">${sv.length ? `<div class="listings-grid">${sv.map(l => this.renderCard(l)).join('')}</div>` : `<div class="empty-state"><div class="empty-state-icon">❤️</div><h3>No saved items</h3><p>Click the heart on listings to save them for later</p><button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button></div>`}</div>`;
     },
 
     renderCreateListing() {
         if (!this.currentUser) { openModal('login'); return ''; }
-        return `<div class="page-header"><div class="container"><h1>Create Listing</h1></div></div>
+        return `<div class="page-header"><div class="container"><h1>Create Listing</h1><p class="lead">List your item for free</p></div></div>
         <div class="container" style="max-width:700px;padding:40px 24px 80px;"><div class="card"><div class="card-body">
             <form onsubmit="createListing(event)">
-                <div class="form-group"><label class="form-label">Title *</label><input type="text" class="form-input" id="listingTitle" required></div>
+                <div class="form-group"><label class="form-label">Title *</label><input type="text" class="form-input" id="listingTitle" placeholder="e.g. iPhone 15 Pro Max - Excellent Condition" required></div>
                 <div class="form-row">
                     <div class="form-group"><label class="form-label">Category</label><select class="form-input form-select" id="listingCat">${this.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
-                    <div class="form-group"><label class="form-label">Price ($)</label><input type="number" class="form-input" id="listingPrice" required></div>
+                    <div class="form-group"><label class="form-label">Price ($)</label><input type="number" class="form-input" id="listingPrice" placeholder="0" required></div>
                 </div>
-                <div class="form-group"><label class="form-label">Description</label><textarea class="form-input form-textarea" id="listingDesc"></textarea></div>
+                <div class="form-group"><label class="form-label">Description</label><textarea class="form-input form-textarea" id="listingDesc" placeholder="Describe your item - condition, features, reason for selling..."></textarea></div>
                 <div class="form-group"><label class="form-label">Location</label><select class="form-input form-select" id="listingLoc">${NZ_REGIONS.map(r => `<option>${r}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Image URL</label><input type="url" class="form-input" id="listingImage" placeholder="https://..."></div>
                 <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Publish Listing</button>
             </form>
         </div></div></div>`;
-    },
-
-    renderAbout() {
-        return `<div class="page-header"><div class="container"><h1>About iSQROLL</h1><p class="lead">A marketplace for the people</p></div></div>
-        <div class="container" style="max-width:800px;padding:40px 24px 80px;"><div class="card"><div class="card-body" style="padding:40px;">
-            <p style="font-size:18px;line-height:1.8;color:var(--slate-600);margin-bottom:24px;">iSQROLL is New Zealand's community marketplace, designed by Kiwis for Kiwis.</p>
-            <p style="line-height:1.8;color:var(--slate-600);">Founded in Whanganui in 2023, we connect New Zealanders to buy and sell locally.</p>
-        </div></div></div>`;
-    },
-
-    renderHowItWorks() {
-        return `<div class="page-header"><div class="container"><h1>How It Works</h1></div></div>
-        <section class="section" style="background:var(--white);"><div class="container">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:32px;text-align:center;">
-                <div style="padding:32px;"><div style="font-size:48px;margin-bottom:16px;">📝</div><h3>List Your Item</h3><p class="text-muted">Take photos, set your price</p></div>
-                <div style="padding:32px;"><div style="font-size:48px;margin-bottom:16px;">💬</div><h3>Connect</h3><p class="text-muted">Chat with buyers directly</p></div>
-                <div style="padding:32px;"><div style="font-size:48px;margin-bottom:16px;">🤝</div><h3>Sell</h3><p class="text-muted">Meet up or ship, get paid</p></div>
-            </div>
-        </div></section>`;
     }
 };
 
-// Helper functions
-function openModal(id) { document.getElementById(id + 'Modal')?.classList.add('active'); document.body.style.overflow = 'hidden'; }
-function closeModal(id) { document.getElementById(id + 'Modal')?.classList.remove('active'); document.body.style.overflow = ''; }
-function toggleDropdown() { document.getElementById('userDropdown')?.classList.toggle('active'); }
-function toggleMobileMenu() { document.getElementById('mobileNav')?.classList.toggle('active'); }
-function showToast(msg, type = 'success') { const t = document.getElementById('toast'), m = document.getElementById('toastMsg'); if (t && m) { m.textContent = msg; t.className = 'toast show ' + type; setTimeout(() => t.classList.remove('show'), 3000); } }
-function doSearch() { App.searchQuery = document.getElementById('searchInput')?.value || ''; App.searchCategory = document.getElementById('searchCat')?.value || ''; App.navigate('browse'); }
-function handleLogin(e) { e.preventDefault(); App.login(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); }
-function handleSignup(e) { e.preventDefault(); App.signup(document.getElementById('signupEmail').value, document.getElementById('signupPassword').value, document.getElementById('signupName').value); }
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+
+function openModal(id) { 
+    document.getElementById(id + 'Modal')?.classList.add('active'); 
+    document.body.style.overflow = 'hidden'; 
+}
+
+function closeModal(id) { 
+    document.getElementById(id + 'Modal')?.classList.remove('active'); 
+    document.body.style.overflow = ''; 
+}
+
+function toggleDropdown() { 
+    document.getElementById('userDropdown')?.classList.toggle('active'); 
+}
+
+function toggleMobileMenu() { 
+    document.getElementById('mobileNav')?.classList.toggle('active'); 
+}
+
+function showToast(msg, type = 'success') { 
+    const t = document.getElementById('toast');
+    const m = document.getElementById('toastMsg'); 
+    if (t && m) { 
+        m.textContent = msg; 
+        t.className = 'toast show ' + type; 
+        setTimeout(() => t.classList.remove('show'), 3000); 
+    } 
+}
+
+function doSearch() { 
+    App.searchQuery = document.getElementById('searchInput')?.value || ''; 
+    App.searchCategory = document.getElementById('searchCat')?.value || ''; 
+    App.navigate('browse'); 
+}
+
+function handleLogin(e) { 
+    e.preventDefault(); 
+    App.login(
+        document.getElementById('loginEmail').value, 
+        document.getElementById('loginPassword').value
+    ); 
+}
+
+function handleSignup(e) { 
+    e.preventDefault(); 
+    App.signup(
+        document.getElementById('signupEmail').value, 
+        document.getElementById('signupPassword').value, 
+        document.getElementById('signupName').value
+    ); 
+}
+
 async function createListing(e) {
     e.preventDefault();
     if (!App.currentUser) return;
@@ -375,15 +616,33 @@ async function createListing(e) {
         showToast('Listing created!');
         await App.loadListings();
         App.navigate('my-listings');
-    } catch (e) { showToast(e.message, 'error'); }
+    } catch (e) { 
+        showToast(e.message, 'error'); 
+    }
 }
-function makeOffer() { const o = prompt('Enter offer ($):'); if (o && !isNaN(o)) showToast('Offer of $' + parseInt(o).toLocaleString() + ' sent!'); }
 
-// Event listeners
+function makeOffer() { 
+    const o = prompt('Enter your offer amount ($):'); 
+    if (o && !isNaN(o)) {
+        showToast('Offer of $' + parseInt(o).toLocaleString() + ' sent to seller!'); 
+    }
+}
+
+// ============================================
+// EVENT LISTENERS
+// ============================================
+
 document.addEventListener('click', e => {
-    if (!e.target.closest('.user-menu')) document.getElementById('userDropdown')?.classList.remove('active');
-    if (!e.target.closest('.mobile-menu-btn') && !e.target.closest('.mobile-nav')) document.getElementById('mobileNav')?.classList.remove('active');
+    if (!e.target.closest('.user-menu')) {
+        document.getElementById('userDropdown')?.classList.remove('active');
+    }
+    if (!e.target.closest('.mobile-menu-btn') && !e.target.closest('.mobile-nav')) {
+        document.getElementById('mobileNav')?.classList.remove('active');
+    }
 });
 
-// Initialize
+// ============================================
+// INITIALIZE
+// ============================================
+
 document.addEventListener('DOMContentLoaded', () => App.init());
