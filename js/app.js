@@ -55,7 +55,18 @@ const Components = {
                 </nav>
                 <div class="header-actions">
                     ${user ? `
-                        <button class="btn btn-secondary" onclick="App.navigate('create')">+ Sell</button>
+                        <button class="btn btn-ghost" onclick="App.navigate('messages')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            iChat
+                        </button>
+                        <button class="btn btn-primary" onclick="App.navigate('create')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            iSell
+                        </button>
+                        <button class="btn btn-ghost" onclick="App.navigate('watchlist')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            iWatch
+                        </button>
                         <div class="user-menu">
                             <div class="user-avatar" onclick="toggleDropdown()">${initial}</div>
                             <div class="user-dropdown" id="userDropdown">
@@ -1962,55 +1973,49 @@ const App = {
         <div class="page-header"><div class="container"><h1>iChat Messages</h1><p class="lead">Your conversations</p></div></div>
         <div class="container section">
             <div id="conversationsList">
-                <div style="text-align:center;padding:40px;">
-                    <div class="loading-spinner"></div>
-                    <p class="text-muted">Loading conversations...</p>
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>No messages yet</h3>
+                    <p>When you contact a seller or receive enquiries, they'll appear here</p>
+                    <button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button>
                 </div>
             </div>
         </div>
         <script>
             (async () => {
-                const conversations = await loadConversations();
-                const container = document.getElementById('conversationsList');
-                if (!container) return;
+                try {
+                    const conversations = await loadConversations();
+                    const container = document.getElementById('conversationsList');
+                    if (!container || conversations.length === 0) return;
 
-                if (conversations.length === 0) {
-                    container.innerHTML = \`
-                        <div class="empty-state">
-                            <div class="empty-state-icon">💬</div>
-                            <h3>No messages yet</h3>
-                            <p>When you contact a seller or receive enquiries, they'll appear here</p>
-                            <button class="btn btn-primary" onclick="App.navigate('browse')">Browse Listings</button>
-                        </div>
-                    \`;
-                    return;
-                }
+                    container.innerHTML = conversations.map(conv => {
+                        const otherUserId = conv.participants.find(id => id !== App.currentUser.uid);
+                        const otherUserName = conv.participantNames?.[otherUserId] || 'User';
+                        const isUnread = conv.unreadBy === App.currentUser.uid;
+                        const timeAgo = conv.lastMessageAt?.toDate ? App.timeAgo(conv.lastMessageAt.toDate()) : '';
 
-                container.innerHTML = conversations.map(conv => {
-                    const otherUserId = conv.participants.find(id => id !== App.currentUser.uid);
-                    const otherUserName = conv.participantNames?.[otherUserId] || 'User';
-                    const isUnread = conv.unreadBy === App.currentUser.uid;
-                    const timeAgo = conv.lastMessageAt?.toDate ? App.timeAgo(conv.lastMessageAt.toDate()) : '';
-
-                    return \`
-                    <div class="card" style="margin-bottom:12px;cursor:pointer;\${isUnread ? 'border-left:4px solid var(--primary);' : ''}" onclick="App.currentConversationId='\${conv.id}';App.render();">
-                        <div class="card-body" style="padding:16px;">
-                            <div style="display:flex;gap:12px;align-items:center;">
-                                <img src="\${conv.listingImage || 'https://picsum.photos/60/60?grayscale'}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
-                                <div style="flex:1;min-width:0;">
-                                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-                                        <h4 style="font-size:14px;margin:0;\${isUnread ? 'font-weight:700;' : ''}">\${otherUserName}</h4>
-                                        <span style="font-size:12px;color:var(--slate-500);">\${timeAgo}</span>
+                        return \`
+                        <div class="card" style="margin-bottom:12px;cursor:pointer;\${isUnread ? 'border-left:4px solid var(--primary);' : ''}" onclick="App.currentConversationId='\${conv.id}';App.render();">
+                            <div class="card-body" style="padding:16px;">
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <img src="\${conv.listingImage || 'https://picsum.photos/60/60?grayscale'}" alt="" style="width:50px;height:50px;object-fit:cover;border-radius:6px;">
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                            <h4 style="font-size:14px;margin:0;\${isUnread ? 'font-weight:700;' : ''}">\${otherUserName}</h4>
+                                            <span style="font-size:12px;color:var(--slate-500);">\${timeAgo}</span>
+                                        </div>
+                                        <p style="font-size:13px;color:var(--slate-600);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\${conv.listingTitle}</p>
+                                        <p style="font-size:13px;color:var(--slate-500);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\${isUnread ? 'font-weight:600;color:var(--slate-700);' : ''}">\${conv.lastMessage}</p>
                                     </div>
-                                    <p style="font-size:13px;color:var(--slate-600);margin:0 0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">\${conv.listingTitle}</p>
-                                    <p style="font-size:13px;color:var(--slate-500);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;\${isUnread ? 'font-weight:600;color:var(--slate-700);' : ''}">\${conv.lastMessage}</p>
+                                    \${isUnread ? '<div style="width:10px;height:10px;background:var(--primary);border-radius:50%;"></div>' : ''}
                                 </div>
-                                \${isUnread ? '<div style="width:10px;height:10px;background:var(--primary);border-radius:50%;"></div>' : ''}
                             </div>
                         </div>
-                    </div>
-                    \`;
-                }).join('');
+                        \`;
+                    }).join('');
+                } catch (e) {
+                    console.error('Error loading conversations:', e);
+                }
             })();
         </script>`;
     },
