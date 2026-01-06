@@ -253,6 +253,11 @@ const App = {
     async init() {
         console.log('🚀 Initializing iSQROLL...');
         
+        // Load data FIRST before any rendering
+        await this.loadCategories();
+        await this.loadListings();
+        
+        // Now set up auth listener
         auth.onAuthStateChanged(user => {
             this.currentUser = user;
             if (user) {
@@ -261,12 +266,11 @@ const App = {
             this.render();
         });
 
-        await this.loadCategories();
-        await this.loadListings();
         this.handleRoute();
         window.addEventListener('popstate', () => this.handleRoute());
         
         console.log('✅ App initialized');
+        console.log(`📁 ${this.categories.length} categories, ${this.categoryGroups.length} groups, ${this.listings.length} listings`);
     },
 
     async loadCategories() {
@@ -470,7 +474,7 @@ const App = {
         return `
         <div class="listing-card" onclick="App.navigate('listing','${l.id}')">
             <div class="listing-image">
-                <img src="${l.images?.[0] || 'https://via.placeholder.com/400x300'}" alt="${l.title}" loading="lazy">
+                <img src="${l.images?.[0] || 'https://placehold.co/400x300/e2e8f0/64748b?text=No+Image'}" alt="${l.title}" loading="lazy">
                 ${l.featured ? '<span class="listing-badge">Featured</span>' : ''}
                 ${l.listingType === 'vehicle' ? '<span class="listing-badge" style="background:var(--slate-800);">Vehicle</span>' : ''}
                 ${l.listingType === 'property' ? '<span class="listing-badge" style="background:var(--primary);">Property</span>' : ''}
@@ -1364,7 +1368,7 @@ async function createListing(e) {
         category: document.getElementById('listingCat').value,
         description: document.getElementById('listingDesc').value,
         location: document.getElementById('listingLoc').value,
-        images: [document.getElementById('listingImage').value || 'https://via.placeholder.com/800x600'],
+        images: [document.getElementById('listingImage').value || 'https://placehold.co/800x600/e2e8f0/64748b?text=No+Image'],
         listingType: type,
         sellerId: App.currentUser.uid,
         sellerName: App.currentUser.displayName || 'User',
