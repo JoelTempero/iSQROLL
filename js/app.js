@@ -1168,17 +1168,27 @@ const App = {
                     </select>
                 </div>
 
-                <!-- Price Range Slider -->
+                <!-- Price Range -->
                 <div class="mobile-filter-section">
                     <label class="mobile-filter-label">Price Range</label>
-                    <div class="price-slider-container">
-                        <div class="price-slider-values">
-                            <span>$<span id="mobilePriceMinDisplay">${f.priceMin || '0'}</span></span>
-                            <span>$<span id="mobilePriceMaxDisplay">${f.priceMax || '50,000+'}</span></span>
-                        </div>
-                        <div class="price-slider-track">
-                            <input type="range" id="mobilePriceMinSlider" class="price-slider price-slider-min" min="0" max="50000" step="100" value="${f.priceMin || 0}" oninput="updatePriceSlider('mobile')">
-                            <input type="range" id="mobilePriceMaxSlider" class="price-slider price-slider-max" min="0" max="50000" step="100" value="${f.priceMax || 50000}" oninput="updatePriceSlider('mobile')">
+                    <div class="price-preset-grid">
+                        <button class="price-preset ${!f.priceMin && !f.priceMax ? 'active' : ''}" data-min="" data-max="" onclick="selectPricePreset(this)">Any Price</button>
+                        <button class="price-preset ${f.priceMin === '0' && f.priceMax === '50' ? 'active' : ''}" data-min="0" data-max="50" onclick="selectPricePreset(this)">Under $50</button>
+                        <button class="price-preset ${f.priceMin === '50' && f.priceMax === '100' ? 'active' : ''}" data-min="50" data-max="100" onclick="selectPricePreset(this)">$50 - $100</button>
+                        <button class="price-preset ${f.priceMin === '100' && f.priceMax === '250' ? 'active' : ''}" data-min="100" data-max="250" onclick="selectPricePreset(this)">$100 - $250</button>
+                        <button class="price-preset ${f.priceMin === '250' && f.priceMax === '500' ? 'active' : ''}" data-min="250" data-max="500" onclick="selectPricePreset(this)">$250 - $500</button>
+                        <button class="price-preset ${f.priceMin === '500' && f.priceMax === '1000' ? 'active' : ''}" data-min="500" data-max="1000" onclick="selectPricePreset(this)">$500 - $1k</button>
+                        <button class="price-preset ${f.priceMin === '1000' && f.priceMax === '5000' ? 'active' : ''}" data-min="1000" data-max="5000" onclick="selectPricePreset(this)">$1k - $5k</button>
+                        <button class="price-preset ${f.priceMin === '5000' && f.priceMax === '10000' ? 'active' : ''}" data-min="5000" data-max="10000" onclick="selectPricePreset(this)">$5k - $10k</button>
+                        <button class="price-preset ${f.priceMin === '10000' && f.priceMax === '50000' ? 'active' : ''}" data-min="10000" data-max="50000" onclick="selectPricePreset(this)">$10k - $50k</button>
+                        <button class="price-preset ${f.priceMin === '50000' && !f.priceMax ? 'active' : ''}" data-min="50000" data-max="" onclick="selectPricePreset(this)">$50k+</button>
+                    </div>
+                    <div class="price-custom-inputs" style="margin-top:12px;">
+                        <span style="font-size:12px;color:#6B7280;">Or custom:</span>
+                        <div class="mobile-price-inputs" style="margin-top:6px;">
+                            <div style="position:relative;flex:1;"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;">$</span><input type="number" class="form-input" placeholder="Min" id="mobilePriceMin" value="${f.priceMin}" style="padding-left:24px;"></div>
+                            <span style="color:#9CA3AF;">to</span>
+                            <div style="position:relative;flex:1;"><span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#9CA3AF;">$</span><input type="number" class="form-input" placeholder="Max" id="mobilePriceMax" value="${f.priceMax}" style="padding-left:24px;"></div>
                         </div>
                     </div>
                 </div>
@@ -1320,17 +1330,23 @@ const App = {
                             <!-- Price Range -->
                             <div class="filter-group" style="margin-bottom:20px;">
                                 <label class="filter-label" style="font-weight:600;font-size:13px;display:block;margin-bottom:8px;">Price Range</label>
-                                <div class="price-slider-container">
-                                    <div class="price-slider-values">
-                                        <span>$<span id="desktopPriceMinDisplay">${f.priceMin || '0'}</span></span>
-                                        <span>$<span id="desktopPriceMaxDisplay">${f.priceMax || '50,000+'}</span></span>
-                                    </div>
-                                    <div class="price-slider-track">
-                                        <input type="range" id="desktopPriceMinSlider" class="price-slider price-slider-min" min="0" max="50000" step="100" value="${f.priceMin || 0}" oninput="updatePriceSlider('desktop')">
-                                        <input type="range" id="desktopPriceMaxSlider" class="price-slider price-slider-max" min="0" max="50000" step="100" value="${f.priceMax || 50000}" oninput="updatePriceSlider('desktop')">
-                                    </div>
+                                <div class="price-preset-grid-desktop">
+                                    <button class="price-preset ${!f.priceMin && !f.priceMax ? 'active' : ''}" data-min="" data-max="" onclick="selectPricePreset(this);App.render();">Any</button>
+                                    <button class="price-preset ${f.priceMin === '0' && f.priceMax === '100' ? 'active' : ''}" data-min="0" data-max="100" onclick="selectPricePreset(this);App.render();">< $100</button>
+                                    <button class="price-preset ${f.priceMin === '100' && f.priceMax === '500' ? 'active' : ''}" data-min="100" data-max="500" onclick="selectPricePreset(this);App.render();">$100-$500</button>
+                                    <button class="price-preset ${f.priceMin === '500' && f.priceMax === '1000' ? 'active' : ''}" data-min="500" data-max="1000" onclick="selectPricePreset(this);App.render();">$500-$1k</button>
+                                    <button class="price-preset ${f.priceMin === '1000' && f.priceMax === '5000' ? 'active' : ''}" data-min="1000" data-max="5000" onclick="selectPricePreset(this);App.render();">$1k-$5k</button>
+                                    <button class="price-preset ${f.priceMin === '5000' && !f.priceMax ? 'active' : ''}" data-min="5000" data-max="" onclick="selectPricePreset(this);App.render();">$5k+</button>
                                 </div>
-                                <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px;" onclick="App.filters.priceMin=document.getElementById('desktopPriceMinSlider').value;App.filters.priceMax=document.getElementById('desktopPriceMaxSlider').value=='50000'?'':document.getElementById('desktopPriceMaxSlider').value;App.render();">Apply Price</button>
+                                <div style="margin-top:12px;">
+                                    <span style="font-size:11px;color:#6B7280;display:block;margin-bottom:6px;">Custom range:</span>
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <div style="position:relative;flex:1;"><span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:13px;">$</span><input type="number" class="form-input" placeholder="Min" id="filterPriceMin" value="${f.priceMin}" style="padding-left:22px;"></div>
+                                        <span style="color:var(--slate-400);">-</span>
+                                        <div style="position:relative;flex:1;"><span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);color:#9CA3AF;font-size:13px;">$</span><input type="number" class="form-input" placeholder="Max" id="filterPriceMax" value="${f.priceMax}" style="padding-left:22px;"></div>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px;" onclick="App.filters.priceMin=document.getElementById('filterPriceMin').value;App.filters.priceMax=document.getElementById('filterPriceMax').value;App.render();">Apply Custom Price</button>
+                                </div>
                             </div>
 
                             <!-- Sale Type -->
@@ -3371,10 +3387,30 @@ function toggleMobileFilters() {
     const drawer = document.getElementById('mobileFilterDrawer');
     const overlay = document.getElementById('mobileFilterOverlay');
     if (drawer && overlay) {
+        const isOpening = !drawer.classList.contains('active');
         drawer.classList.toggle('active');
         overlay.classList.toggle('active');
-        document.body.style.overflow = drawer.classList.contains('active') ? 'hidden' : '';
+        document.body.style.overflow = isOpening ? 'hidden' : '';
+        
+        // Prevent touch events from scrolling page behind
+        if (isOpening) {
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+        } else {
+            document.body.style.position = '';
+            document.body.style.width = '';
+        }
     }
+}
+
+function selectPricePreset(btn) {
+    // Clear other active states in same container
+    btn.parentElement.querySelectorAll('.price-preset').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Set filter values
+    App.filters.priceMin = btn.dataset.min || '';
+    App.filters.priceMax = btn.dataset.max || '';
 }
 
 function updatePriceSlider(prefix) {
@@ -3412,11 +3448,15 @@ function saveMobileFilters() {
     App.filters.location = document.getElementById('mobileLocationSelect')?.value || '';
     App.filters.sortBy = document.getElementById('mobileSortSelect')?.value || 'newest';
     
-    // Price from sliders
-    const minPrice = document.getElementById('mobilePriceMinSlider')?.value || '';
-    const maxPrice = document.getElementById('mobilePriceMaxSlider')?.value || '';
-    App.filters.priceMin = minPrice === '0' ? '' : minPrice;
-    App.filters.priceMax = maxPrice === '50000' ? '' : maxPrice;
+    // Price - check custom inputs first, otherwise use preset
+    const customMin = document.getElementById('mobilePriceMin')?.value;
+    const customMax = document.getElementById('mobilePriceMax')?.value;
+    
+    if (customMin || customMax) {
+        App.filters.priceMin = customMin || '';
+        App.filters.priceMax = customMax || '';
+    }
+    // If no custom values, the preset buttons already set App.filters.priceMin/Max
     
     // Condition from chips
     const conditionChip = document.querySelector('.mobile-filter-section .mobile-filter-chips .filter-chip.active[data-value]');
