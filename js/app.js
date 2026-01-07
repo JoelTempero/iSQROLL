@@ -2382,83 +2382,75 @@ const App = {
         return `
         <div class="page-header"><div class="container"><h1>Monthly Subscription</h1><p class="lead">Choose the plan that's right for you</p></div></div>
         <section class="section"><div class="container">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1100px;margin:0 auto;">
+            <div class="pricing-grid">
 
                 <!-- Free Membership -->
-                <div class="card" style="text-align:center;position:relative;">
-                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
-                        <span style="font-size:24px;">⭐</span>
-                    </div>
-                    <div class="card-body" style="padding:32px 20px;">
-                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">FREE MEMBERSHIP</h3>
-                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited General listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Automotive listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Property listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
+                <div class="card pricing-card">
+                    <div class="pricing-icon">⭐</div>
+                    <div class="card-body">
+                        <h3 class="pricing-title">FREE MEMBERSHIP</h3>
+                        <ul class="pricing-features">
+                            <li><span class="check">✓</span> Unlimited General listings</li>
+                            <li><span class="check">✓</span> Unlimited Automotive listings</li>
+                            <li><span class="check">✓</span> Unlimited Property listings</li>
+                            <li><span class="check">✓</span> iChat</li>
+                            <li><span class="check">✓</span> iRate</li>
+                            <li><span class="check">✓</span> Sales report</li>
                         </ul>
-                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 0.00</div>
+                        <div class="pricing-price">NZ$ 0.00</div>
                         <button class="btn btn-secondary" style="width:100%;" onclick="${this.currentUser ? "showToast('You are on the Free plan')" : "openModal('signup')"}">Select</button>
                     </div>
                 </div>
 
                 <!-- Real Estate Gold -->
-                <div class="card" style="text-align:center;position:relative;border:2px solid #3b82f6;">
-                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
-                        <span style="font-size:24px;">⭐</span>
-                    </div>
-                    <div class="card-body" style="padding:32px 20px;">
-                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">REAL ESTATE GOLD</h3>
-                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Property listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
+                <div class="card pricing-card pricing-featured" style="border-color:#3b82f6;">
+                    <div class="pricing-icon">⭐</div>
+                    <div class="card-body">
+                        <h3 class="pricing-title">REAL ESTATE GOLD</h3>
+                        <ul class="pricing-features">
+                            <li><span class="check">✓</span> 500 General listings</li>
+                            <li><span class="check">✓</span> Unlimited Property listings</li>
+                            <li><span class="check">✓</span> iChat</li>
+                            <li><span class="check">✓</span> iRate</li>
+                            <li><span class="check">✓</span> Sales report</li>
                         </ul>
-                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 399</div>
+                        <div class="pricing-price">NZ$ 399</div>
                         <button class="btn btn-primary" style="width:100%;background:#3b82f6;" onclick="showToast('Contact us to subscribe')">Select</button>
                     </div>
                 </div>
 
                 <!-- Business -->
-                <div class="card" style="text-align:center;position:relative;border:2px solid #ef4444;">
-                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
-                        <span style="font-size:24px;">⭐</span>
-                    </div>
-                    <div class="card-body" style="padding:32px 20px;">
-                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;">BUSINESS</h3>
-                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 100 Automotive listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 100 Property listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iChat</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Motorcentral Data Import</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
+                <div class="card pricing-card pricing-featured" style="border-color:#ef4444;">
+                    <div class="pricing-icon">⭐</div>
+                    <div class="card-body">
+                        <h3 class="pricing-title">BUSINESS</h3>
+                        <ul class="pricing-features">
+                            <li><span class="check">✓</span> 500 General listings</li>
+                            <li><span class="check">✓</span> 100 Automotive listings</li>
+                            <li><span class="check">✓</span> 100 Property listings</li>
+                            <li><span class="check">✓</span> iChat</li>
+                            <li><span class="check">✓</span> iRate</li>
+                            <li><span class="check">✓</span> Motorcentral Data Import</li>
+                            <li><span class="check">✓</span> Sales report</li>
                         </ul>
-                        <div style="font-size:32px;font-weight:700;margin:20px 0;">NZ$ 399</div>
+                        <div class="pricing-price">NZ$ 399</div>
                         <button class="btn btn-primary" style="width:100%;background:#ef4444;" onclick="showToast('Contact us to subscribe')">Select</button>
                     </div>
                 </div>
 
                 <!-- Dealership Premium -->
-                <div class="card" style="text-align:center;position:relative;border:2px solid var(--primary);">
-                    <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);">
-                        <span style="font-size:24px;">⭐</span>
-                    </div>
-                    <div class="card-body" style="padding:32px 20px;">
-                        <h3 style="margin:8px 0;font-size:16px;font-weight:700;color:var(--primary);">DEALERSHIP PREMIUM</h3>
-                        <ul style="text-align:left;list-style:none;margin:20px 0;font-size:13px;">
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> 500 General listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Unlimited Automotive listings</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> iRate</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Motorcentral Data Import</li>
-                            <li style="padding:6px 0;display:flex;align-items:center;gap:8px;"><span style="color:var(--primary);">✓</span> Sales report</li>
+                <div class="card pricing-card pricing-featured" style="border-color:var(--primary);">
+                    <div class="pricing-icon">⭐</div>
+                    <div class="card-body">
+                        <h3 class="pricing-title" style="color:var(--primary);">DEALERSHIP PREMIUM</h3>
+                        <ul class="pricing-features">
+                            <li><span class="check">✓</span> 500 General listings</li>
+                            <li><span class="check">✓</span> Unlimited Automotive listings</li>
+                            <li><span class="check">✓</span> iRate</li>
+                            <li><span class="check">✓</span> Motorcentral Data Import</li>
+                            <li><span class="check">✓</span> Sales report</li>
                         </ul>
-                        <div style="font-size:32px;font-weight:700;color:var(--primary);margin:20px 0;">NZ$ 499</div>
+                        <div class="pricing-price" style="color:var(--primary);">NZ$ 499</div>
                         <button class="btn btn-primary" style="width:100%;" onclick="showToast('Contact us to subscribe')">Select</button>
                     </div>
                 </div>

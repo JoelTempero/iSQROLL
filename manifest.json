@@ -1,14 +1,14 @@
 {
-  "id": "/",
+  "id": "/iSQROLL/",
   "name": "iSQROLL - NZ Marketplace",
   "short_name": "iSQROLL",
   "description": "New Zealand's trusted marketplace. Buy and sell vehicles, property, farming equipment and more.",
-  "start_url": "/",
+  "start_url": "/iSQROLL/",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#0D9488",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "/iSQROLL/",
   "icons": [
     {
       "src": "icons/icon-192.png",
