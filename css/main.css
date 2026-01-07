@@ -764,8 +764,11 @@ h4 { font-size: 1rem; }
 .listing-info-price {
     display: flex;
     align-items: baseline;
+    justify-content: center;
     gap: 8px;
     margin-bottom: 8px;
+    padding: 16px 20px;
+    text-align: center;
 }
 .listing-info-price .current {
     font-family: var(--font-display);

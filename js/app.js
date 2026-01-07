@@ -1479,7 +1479,18 @@ const App = {
         
         return `
         <div class="listing-detail"><div class="container">
-            <div class="breadcrumb">
+            <!-- Mobile Title (shown first on mobile) -->
+            <div class="mobile-listing-header">
+                <h1 class="mobile-listing-title">${l.title}</h1>
+                <div class="mobile-listing-price">$${(l.price || 0).toLocaleString()}</div>
+                <div class="mobile-listing-meta">
+                    <span>📍 ${l.location}</span>
+                    <span>👁 ${l.views || 0} views</span>
+                    ${l.odometer ? `<span>${l.odometer.toLocaleString()} km</span>` : ''}
+                </div>
+            </div>
+
+            <div class="breadcrumb desktop-only">
                 <a onclick="App.navigate('home')">Home</a><span class="separator">›</span>
                 <a onclick="App.searchGroup='automotive';App.navigate('browse')">Automotive</a><span class="separator">›</span>
                 <a onclick="App.searchCategory='${l.category}';App.navigate('browse')">${cat?.name || 'Vehicle'}</a><span class="separator">›</span>
@@ -1496,7 +1507,7 @@ const App = {
                             ${l.images.map((img, i) => `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="document.querySelector('.gallery-main img').src='${img}'"><img src="${img}" alt=""></div>`).join('')}
                         </div>` : ''}
                     </div>
-                    <p class="text-muted text-sm" style="margin-top:8px;">👁 ${l.views || 0} views</p>
+                    <p class="text-muted text-sm desktop-only" style="margin-top:8px;">👁 ${l.views || 0} views</p>
                     
                     <!-- Vehicle Information -->
                     <div class="card" style="margin-top:24px;">
@@ -1596,6 +1607,13 @@ const App = {
                     </div>
                 </div>
             </div>
+
+            <!-- Mobile Bottom Actions (sticky) -->
+            <div class="mobile-listing-actions">
+                <button class="btn btn-ghost" onclick="App.toggleSave('${l.id}')">${saved ? '❤️' : '🤍'}</button>
+                <button class="btn btn-ghost" onclick="openShareModal('${l.id}')">↗</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Contact Seller</button>
+            </div>
         </div></div>`;
     },
 
@@ -1605,7 +1623,18 @@ const App = {
         
         return `
         <div class="listing-detail"><div class="container">
-            <div class="breadcrumb">
+            <!-- Mobile Title (shown first on mobile) -->
+            <div class="mobile-listing-header">
+                <h1 class="mobile-listing-title">${l.title}</h1>
+                <div class="mobile-listing-price">${l.priceDisplay || '$' + (l.price || 0).toLocaleString()}</div>
+                <div class="mobile-listing-meta">
+                    <span>📍 ${l.suburb || l.location}</span>
+                    ${l.bedrooms ? `<span>🛏 ${l.bedrooms} bed</span>` : ''}
+                    ${l.bathrooms ? `<span>🚿 ${l.bathrooms} bath</span>` : ''}
+                </div>
+            </div>
+
+            <div class="breadcrumb desktop-only">
                 <a onclick="App.navigate('home')">Home</a><span class="separator">›</span>
                 <a onclick="App.searchGroup='property';App.navigate('browse')">Property</a><span class="separator">›</span>
                 <a onclick="App.searchCategory='${l.category}';App.navigate('browse')">${cat?.name || 'Property'}</a><span class="separator">›</span>
@@ -1624,7 +1653,7 @@ const App = {
                     </div>
                     
                     ${l.agentLogo ? `<div style="margin-top:24px;"><img src="${l.agentLogo}" alt="${l.agentCompany}" style="max-height:60px;"></div>` : ''}
-                    <p class="text-muted text-sm" style="margin-top:8px;">👁 ${l.views || 0} views</p>
+                    <p class="text-muted text-sm desktop-only" style="margin-top:8px;">👁 ${l.views || 0} views</p>
                     
                     <!-- Property Information -->
                     <div class="card" style="margin-top:24px;">
@@ -1717,6 +1746,13 @@ const App = {
                     </div>
                 </div>
             </div>
+
+            <!-- Mobile Bottom Actions (sticky) -->
+            <div class="mobile-listing-actions">
+                <button class="btn btn-ghost" onclick="App.toggleSave('${l.id}')">${saved ? '❤️' : '🤍'}</button>
+                <button class="btn btn-ghost" onclick="openShareModal('${l.id}')">↗</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Contact Agent</button>
+            </div>
         </div></div>`;
     },
 
@@ -1726,7 +1762,17 @@ const App = {
         
         return `
         <div class="listing-detail"><div class="container">
-            <div class="breadcrumb">
+            <!-- Mobile Title (shown first on mobile) -->
+            <div class="mobile-listing-header">
+                <h1 class="mobile-listing-title">${l.title}</h1>
+                <div class="mobile-listing-price">$${(l.price || 0).toLocaleString()}</div>
+                <div class="mobile-listing-meta">
+                    <span>📍 ${l.location}</span>
+                    <span>👁 ${l.views || 0} views</span>
+                </div>
+            </div>
+
+            <div class="breadcrumb desktop-only">
                 <a onclick="App.navigate('home')">Home</a><span class="separator">›</span>
                 <a onclick="App.searchCategory='${l.category}';App.navigate('browse')">${cat?.name || 'Listings'}</a><span class="separator">›</span>
                 <span>${l.title.substring(0, 30)}...</span>
@@ -1742,11 +1788,11 @@ const App = {
                             ${l.images.map((img, i) => `<div class="gallery-thumb ${i === 0 ? 'active' : ''}" onclick="document.querySelector('.gallery-main img').src='${img}'"><img src="${img}" alt=""></div>`).join('')}
                         </div>` : ''}
                     </div>
-                    <p class="text-muted text-sm" style="margin-top:8px;">👁 ${l.views || 0} views</p>
+                    <p class="text-muted text-sm desktop-only" style="margin-top:8px;">👁 ${l.views || 0} views</p>
                     
                     <!-- Details -->
                     <div class="card" style="margin-top:24px;">
-                        <div class="card-header"><h3 class="card-title">Detail</h3></div>
+                        <div class="card-header"><h3 class="card-title">Details</h3></div>
                         <div class="card-body">
                             <div class="detail-grid">
                                 ${l.condition ? `<div class="detail-item"><span class="detail-label">Condition</span><span class="detail-value">${l.condition}</span></div>` : ''}
@@ -1762,8 +1808,8 @@ const App = {
                     </div>
                 </div>
                 
-                <!-- Right Column -->
-                <div>
+                <!-- Right Column (Desktop info card) -->
+                <div class="desktop-only">
                     <div class="listing-info-card">
                         <div class="listing-detail-actions">
                             <button class="btn btn-ghost" onclick="openShareModal('${l.id}')">↗ Share</button>
@@ -1803,11 +1849,18 @@ const App = {
                                     <p class="text-muted text-sm">${l.location}, New Zealand</p>
                                 </div>
                             </div>
-                            <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="${this.currentUser ? "openModal('message')" : "openModal('login')"}">💬 Contact</button>
+                            <button class="btn btn-primary" style="width:100%;margin-top:16px;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">💬 Contact Seller</button>
                             <a onclick="viewSellerListings('${l.sellerId}')" class="btn btn-ghost" style="width:100%;margin-top:8px;">View seller's other listings</a>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Mobile Bottom Actions (sticky) -->
+            <div class="mobile-listing-actions">
+                <button class="btn btn-ghost" onclick="App.toggleSave('${l.id}')">${saved ? '❤️' : '🤍'}</button>
+                <button class="btn btn-ghost" onclick="openShareModal('${l.id}')">↗</button>
+                <button class="btn btn-primary" style="flex:1;" onclick="${this.currentUser ? `openMessageModal('${l.id}')` : "openModal('login')"}">Contact Seller</button>
             </div>
         </div></div>`;
     },
